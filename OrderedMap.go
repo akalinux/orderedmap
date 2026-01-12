@@ -20,5 +20,5 @@ type OrderedMap[K any, V any] interface {
 
 	// Trys to delete the elements between a and b, returns the total number of elements deleted.
 	// Neither a or b are required to exist.
-	RemoveBetween(a, b K) (total int)
+	RemoveBetween(a, b K) (total int, ok bool)
 }

@@ -135,122 +135,6 @@ func (s *SliceTree[K, V]) RemoveAll() int {
 	return t
 }
 
-func (s *SliceTree[K, V]) clearTo(key K, x int, cb func(a, b int)) {
-	i, o := s.GetIndex(key)
-	index := i + o + x
-	end := index + 1
-	size := len(s.Slices)
-	if index < 0 {
-		cb(0, 0)
-		return
-	} else if end > size {
-		cb(0, size)
-		s.Slices = s.Slices[:0]
-		return
-	}
-
-	cb(0, end)
-
-	if end == size {
-		s.Slices = s.Slices[:0]
-	} else {
-		s.Slices = s.Slices[end:size]
-	}
-}
-
-func (s *SliceTree[K, V]) clearFrom(key K, x int, cb func(a, b int)) {
-	i, o := s.GetIndex(key)
-	index := i + o + x
-	end := index + 2
-	size := len(s.Slices)
-	if index <= 0 {
-		cb(0, size)
-		s.Slices = s.Slices[:0]
-		return
-	} else if index >= size {
-		cb(0, 0)
-		return
-	}
-	if end > size {
-		end = size
-	}
-
-	cb(index, end)
-	s.Slices = s.Slices[0:index]
-}
-
-// RemoveFrom implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveFrom(key K) (total int) {
-	s.clearFrom(key, 0, func(a, b int) {
-		total = b - a
-	})
-	return
-}
-
-// RemoveFromS implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveFromS(key K) (result []*KvSet[K, V]) {
-	s.clearFrom(key, 0, func(a, b int) {
-		result = s.Slices[a:b]
-	})
-	return
-}
-
-// RemoveAfterS implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveAfterS(key K) (result []*KvSet[K, V]) {
-	s.clearFrom(key, 1, func(a, b int) {
-		result = s.Slices[a:b]
-	})
-	return
-}
-
-// RemoveAfter implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveAfter(key K) (total int) {
-	s.clearFrom(key, 1, func(a, b int) {
-		total = b - a
-	})
-	return
-}
-
-// RemoveTo implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveTo(key K) (total int) {
-	s.clearTo(key, 0, func(a, b int) {
-		total = b - a
-	})
-	return
-}
-
-// RemoveBefore implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveBefore(key K) (total int) {
-	s.clearTo(key, -1, func(a, b int) {
-		total = b - a
-	})
-	return
-}
-
-// RemoveToS implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveToS(key K) (result []*KvSet[K, V]) {
-	s.clearTo(key, 0, func(a, b int) {
-		total := b - a
-		if total == 0 {
-			return
-		}
-		result = s.Slices[0:b]
-	})
-	return
-}
-
-// RemoveBeforeS implements [OrderedMapExt].
-func (s *SliceTree[K, V]) RemoveBeforeS(key K) (result []*KvSet[K, V]) {
-	s.clearTo(key, -1, func(a, b int) {
-		total := b - a
-		if total == 0 {
-			return
-		}
-		result = s.Slices[0:b]
-	})
-	return
-}
-
 // Returns the total number key/value pairs in the slice.
 func (s *SliceTree[K, V]) Size() int {
 	return len(s.Slices)
@@ -566,29 +450,6 @@ func (s *SliceTree[K, V]) contig(totalKeys int, r iter.Seq2[int, int], cb func(a
 	}
 }
 
-// ThreadSafe implements [OrderedMap]
-func (s *SliceTree[K, V]) ThreadSafe() bool { return false }
-
-// RemoveBeforeI implements [OrderedMapExt]
-func (s *SliceTree[K, V]) RemoveBeforeI(key K) iter.Seq2[K, V] {
-	return KvIter(s.RemoveBeforeS(key))
-}
-
-// RemoveFromI implements [OrderedMapExt]
-func (s *SliceTree[K, V]) RemoveFromI(key K) iter.Seq2[K, V] {
-	return KvIter(s.RemoveFromS(key))
-}
-
-// RemoveAfterI implements [OrderedMapExt]
-func (s *SliceTree[K, V]) RemoveAfterI(key K) iter.Seq2[K, V] {
-	return KvIter(s.RemoveAfterS(key))
-}
-
-// RemoveAfterI implements [OrderedMapExt]
-func (s *SliceTree[K, V]) RemoveToI(key K) iter.Seq2[K, V] {
-	return KvIter(s.RemoveToS(key))
-}
-
 // Returns a thread safe instnace from the current instance.
 func (s *SliceTree[K, V]) ToTs() OrderedMap[K, V] {
 	return &ThreadSafeOrderedMap[K, V]{Tree: s}
@@ -684,10 +545,22 @@ func (s *SliceTree[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
 
 }
 
-func (s *SliceTree[K, V]) RemoveBetween(a, b K) (total int) {
-	s.clearBetween(a, b, func(x, y, t int, ok bool) {
-		if ok {
+func (s *SliceTree[K, V]) RemoveBetween(a, b K) (total int, ok bool) {
+	s.clearBetween(a, b, func(x, y, t int, res bool) {
+		if res {
 			total = 1 + y - x
+			ok = res
+		}
+	})
+	return
+}
+
+func (s *SliceTree[K, V]) RemoveBetweenKV(a, b K) (removed iter.Seq2[K, V], ok bool) {
+	s.clearBetween(a, b, func(x, y, t int, res bool) {
+		if res {
+			set := s.Slices[x : y+1]
+			removed = KvIter(set)
+			ok = res
 		}
 	})
 	return
@@ -699,4 +572,8 @@ func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool)) {
 	if ok {
 		s.Slices = slices.Delete(s.Slices, begin, 1+end)
 	}
+}
+
+func (s *SliceTree[K, V]) ThreadSafe() bool {
+	return false
 }
