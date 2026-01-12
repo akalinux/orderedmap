@@ -2,7 +2,6 @@ package omap
 
 import (
 	"cmp"
-	"fmt"
 	"iter"
 	"slices"
 )
@@ -591,7 +590,7 @@ func (s *SliceTree[K, V]) RemoveToI(key K) iter.Seq2[K, V] {
 }
 
 // Returns a thread safe instnace from the current instance.
-func (s *SliceTree[K, V]) ToTs() OrderedMapExt[K, V] {
+func (s *SliceTree[K, V]) ToTs() OrderedMap[K, V] {
 	return &ThreadSafeOrderedMap[K, V]{Tree: s}
 }
 
@@ -640,9 +639,7 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K) (begin, end, total int, ok bool)
 	begin, c := s.GetIndex(a)
 	//begin = i + o
 	offset := c
-	p := c * c
 	end, d := s.GetIndex(b)
-	p += d * d
 	offset += d
 	//end = i + o
 
@@ -650,25 +647,7 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K) (begin, end, total int, ok bool)
 	final := size - 1
 	if offset*offset == 4 && ((begin+end == final*2) || (begin+end == 0)) {
 		// completly out of our ragne
-		total = 0
-		begin = 0
-		end = 0
 		return
-	}
-	if p == 2 {
-		// if we are in this block we are in a between 2 nodes
-		if begin+1 == end {
-
-			fmt.Printf("Getting here\n")
-			// if we got here.. then the 2 index points are next to each other
-			return
-		}
-	}
-	if end >= size {
-		end = final
-	}
-	if begin < 0 {
-		begin = 0
 	}
 
 	if d < 1 {

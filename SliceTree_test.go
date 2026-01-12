@@ -583,6 +583,25 @@ func TestBetween(t *testing.T) {
 
 	betweeTests(
 		t,
+		"between 5 and 10",
+		cb,
+		6, 9, // a,b NICE!
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+	)
+	betweeTests(
+		t,
+		"around 10",
+		cb,
+		9, 11, // a,b NICE!
+		true, // ok
+		10,   // expected sum
+		1,    // expected row count
+	)
+
+	betweeTests(
+		t,
 		"Around 0",
 		cb,
 		-400, 3, // a,b

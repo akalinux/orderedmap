@@ -12,7 +12,7 @@ type ThreadSafeOrderedMap[K any, V any] struct {
 }
 
 // Creates a new thread safe OrderedMap.
-func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMapExt[K, V]) {
+func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMap[K, V]) {
 
 	Map = &ThreadSafeOrderedMap[K, V]{
 		Tree: New[K, V](Cmp),
