@@ -1,8 +1,10 @@
-package omap 
+package omap
 
 import "iter"
 
 type Map[K any, V any] interface {
+	IsThreadSafe
+
 	// Should return an iterator for all key/value pairs
 	All() iter.Seq2[K, V]
 
@@ -12,9 +14,9 @@ type Map[K any, V any] interface {
 	// Returns all the values, the int is expected to be a sequential number
 	Values() iter.Seq2[int, V]
 
-	// Clears all elements.
+	// Removes all elements.
 	// Returns how many element were removed.
-	ClearAll() int
+	RemoveAll() int
 
 	// Returns true if the key exists, false if it does not.
 	Exists(key K) bool
@@ -27,14 +29,11 @@ type Map[K any, V any] interface {
 	MassRemove(keys ...K) (total int)
 
 	// Sets the key to the value, returns the index id.
-	Put(key K, vvalue V) (index int)
+	Put(key K, value V) (index int)
 
 	// Tries to remove the given key, returns false if the key does not exist.
 	Remove(key K) bool
 
 	// Sets the value at a given index point.
 	Size() int
-
-	// Should return true of this instance is thread safe, fakse if not.
-	ThreadSafe() bool
 }

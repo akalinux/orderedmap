@@ -1,4 +1,4 @@
-package omap 
+package omap
 
 import (
 	"cmp"
@@ -148,7 +148,7 @@ func checkExpected(t *testing.T, set string, exp []int, got []*KvSet[int, int]) 
 	}
 }
 
-func TestClearIndex(t *testing.T) {
+func TestRemoveIndex(t *testing.T) {
 	s := &SliceTree[int, int]{
 		Cmp: cmp.Compare[int],
 		Slices: []*KvSet[int, int]{
@@ -193,7 +193,7 @@ func TestClearIndex(t *testing.T) {
 		{3, 0},
 	}, s.Slices, true, s.clearIdx(1, 0))
 
-	fullCheck(t, "Clear all", []*KvSet[int, int]{}, s.Slices, true, 3 == s.ClearAll())
+	fullCheck(t, "Remove all", []*KvSet[int, int]{}, s.Slices, true, 3 == s.RemoveAll())
 
 	if s.Size() != 0 {
 		t.Fatalf("Failed to actually clear our set!")
@@ -509,324 +509,6 @@ func contigCheck(t *testing.T, name string, exp [][]int, f *SliceTree[int, any])
 	}
 }
 
-func TestClearTo(t *testing.T) {
-	clearTesting(t, "Delete from mid",
-		3, // total keys, 0,1,2
-		1, // delete to
-		2, // total removed
-		[]int{2},
-	)
-	clearTesting(t, "Delete to end",
-		3, // total keys, 0,1,2
-		2, // delete to
-		3, // total removed
-		[]int{},
-	)
-
-	clearTesting(t, "Delete before the start",
-		3,  // total keys, 0,1,2
-		-1, // delete to
-		0,  // total removed
-		[]int{0, 1, 2},
-	)
-	clearTesting(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		3, // delete to
-		3, // total removed
-		[]int{},
-	)
-}
-
-func TestClearToS(t *testing.T) {
-	clearTestingS(t, "Delete from mid",
-		3,           // total keys, 0,1,2
-		1,           // delete to
-		[]int{0, 1}, // total removed
-		[]int{2},
-	)
-	clearTestingS(t, "Delete to end",
-		3,              // total keys, 0,1,2
-		2,              // delete to
-		[]int{0, 1, 2}, // total removed
-		[]int{},
-	)
-
-	clearTestingS(t, "Delete before the start",
-		3,  // total keys, 0,1,2
-		-1, // delete to
-		[]int{},
-		[]int{0, 1, 2},
-	)
-	clearTestingS(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		3, // delete to
-		[]int{0, 1, 2},
-		[]int{},
-	)
-}
-
-func clearTestingS(t *testing.T, test string, keys, to int, removed []int, res []int, opt ...int) {
-	t.Logf("Running test set: [%s]", test)
-	s := New[int, int](cmp.Compare)
-	for i := range keys {
-		t.Logf("  Adding key: %d", i)
-		s.Put(i, 0)
-	}
-	for i, kv := range s.Slices {
-		t.Logf("  Inital Row: %d, value: %d", i, kv.Key)
-	}
-	var check []*KvSet[int, int]
-	if len(opt) == 0 {
-		t.Logf("Using ClearToS")
-		check = s.ClearToS(to)
-		// calling again should do nothing
-		s.ClearToS(to)
-	} else if opt[0] == 1 {
-		t.Logf("Using ClearFromS")
-		check = s.ClearFromS(to)
-		s.ClearFromS(to)
-	} else if opt[0] == 2 {
-		t.Logf("Using ClearBeforeS")
-		check = s.ClearBeforeS(to)
-		s.ClearBeforeS(to)
-	} else if opt[0] == 3 {
-		t.Logf("Using ClearAfterS")
-		check = s.ClearAfterS(to)
-		s.ClearAfterS(to)
-	}
-
-	for i, kv := range s.Slices {
-		t.Logf("  Final Row: %d, value: %d", i, kv.Key)
-	}
-	if len(check) != len(removed) {
-		t.Fatalf("Expected delete size of: %d, got: %d", len(removed), len(check))
-	}
-	for i, k := range removed {
-		if check[i].Key != k {
-			t.Fatalf("Bad delete record, expected: %d, got %d for row: %d", k, check[i].Key, i)
-		}
-	}
-	if len(s.Slices) != len(res) {
-		t.Fatalf("Expected s.Slices len: %d, got %d", len(res), len(s.Slices))
-	}
-	for i, k := range res {
-		if s.Slices[i].Key != k {
-			t.Fatalf("Bad internal state, for record: %d, expected: %d, got: %d", i, k, s.Slices[i].Key)
-		}
-	}
-
-}
-
-func clearTesting(t *testing.T, test string, keys, to, removed int, res []int, opt ...int) {
-	t.Logf("Running test set: [%s]", test)
-	s := New[int, int](cmp.Compare)
-	for i := range keys {
-		t.Logf("  Adding key: %d", i)
-		s.Put(i, 0)
-	}
-	for i, kv := range s.Slices {
-		t.Logf("  Inital Row: %d, value: %d", i, kv.Key)
-	}
-	var check int
-	if len(opt) == 0 {
-		t.Logf("Calling ClearTo")
-		check = s.ClearTo(to)
-	} else if opt[0] == 1 {
-		t.Logf("Calling ClearBefore")
-		check = s.ClearBefore(to)
-	} else if opt[0] == 2 {
-		t.Logf("Calling ClearFrom")
-		check = s.ClearFrom(to)
-	} else if opt[0] == 3 {
-		t.Logf("Calling ClearAfter")
-		check = s.ClearAfter(to)
-	}
-
-	for i, kv := range s.Slices {
-		t.Logf("  Final Row: %d, value: %d", i, kv.Key)
-	}
-	if check != removed {
-		t.Fatalf("Expected delete size of: %d, got: %d", removed, check)
-	}
-	if len(s.Slices) != len(res) {
-		t.Fatalf("Expected s.Slices len: %d, got %d", len(res), len(s.Slices))
-	}
-	for i, k := range res {
-		if s.Slices[i].Key != k {
-			t.Fatalf("Bad internal state, for record: %d, expected: %d, got: %d", i, k, s.Slices[i].Key)
-		}
-	}
-
-}
-
-func TestClearBefore(t *testing.T) {
-	clearTesting(t, "Delete from mid",
-		3, // total keys, 0,1,2
-		1, // delete to
-		1, // total removed
-		[]int{1, 2},
-		1,
-	)
-	clearTesting(t, "Delete before the start",
-		3,  // total keys, 0,1,2
-		-1, // delete to
-		0,  // total removed
-		[]int{0, 1, 2},
-		1,
-	)
-	clearTesting(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		4, // delete to
-		3, // total removed
-		[]int{},
-		1,
-	)
-
-}
-
-func TestClearFrom(t *testing.T) {
-	clearTesting(t, "Delete from mid",
-		3, // total keys, 0,1,2
-		1, // delete from
-		2, // total removed
-		[]int{0},
-		2,
-	)
-	clearTesting(t, "Delete before the start",
-		3,  // total keys, 0,1,2
-		-1, // delete from
-		3,  // total removed
-		[]int{},
-		2,
-	)
-	clearTesting(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		4, // delete from
-		0, // total removed
-		[]int{0, 1, 2},
-		2,
-	)
-}
-
-func TestClearAfter(t *testing.T) {
-	clearTesting(t, "Delete from mid",
-		3, // total keys, 0,1,2
-		1, // delete from
-		1, // total removed
-		[]int{0, 1},
-		3,
-	)
-	clearTesting(t, "Delete before the start",
-		3,  // total keys, 0,1,2
-		-1, // delete from
-		3,  // total removed
-		[]int{},
-		3,
-	)
-	clearTesting(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		4, // delete from
-		0, // total removed
-		[]int{0, 1, 2},
-		3,
-	)
-}
-func TestClearFromS(t *testing.T) {
-	clearTestingS(t, "Delete from mid",
-		3,           // total keys, 0,1,2
-		1,           // delete from
-		[]int{1, 2}, // total removed
-		[]int{0},
-		1,
-	)
-	clearTestingS(t, "Delete to end",
-		3,        // total keys, 0,1,2
-		2,        // delete from
-		[]int{2}, // total removed
-		[]int{0, 1},
-		1,
-	)
-
-	clearTestingS(t, "Delete before the start",
-		3,              // total keys, 0,1,2
-		-1,             // delete to
-		[]int{0, 1, 2}, // removed
-		[]int{},        // remaining
-		1,
-	)
-	clearTestingS(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		3, // delete to
-		[]int{},
-		[]int{0, 1, 2},
-		1,
-	)
-}
-
-func TestClearBeforeS(t *testing.T) {
-	clearTestingS(t, "Delete from mid",
-		3,        // total keys, 0,1,2
-		1,        // delete before
-		[]int{0}, // total removed
-		[]int{1, 2},
-		2,
-	)
-	clearTestingS(t, "Delete to end",
-		3,           // total keys, 0,1,2
-		2,           // delete before
-		[]int{0, 1}, // keys removed
-		[]int{2},    // keys remaining
-		2,
-	)
-
-	clearTestingS(t, "Delete before the start",
-		3,              // total keys, 0,1,2
-		-1,             // delete before
-		[]int{},        // removed
-		[]int{0, 1, 2}, // remaining
-		2,
-	)
-	clearTestingS(t, "Delete after the end",
-		3,              // total keys, 0,1,2
-		3,              // delete before
-		[]int{0, 1, 2}, // removed
-		[]int{},
-		2,
-	)
-}
-
-func TestClearAfterS(t *testing.T) {
-	clearTestingS(t, "Delete from mid",
-		3,        // total keys, 0,1,2
-		1,        // delete after
-		[]int{2}, // total removed
-		[]int{0, 1},
-		3,
-	)
-	clearTestingS(t, "Delete to end",
-		3,       // total keys, 0,1,2
-		2,       // delete after
-		[]int{}, // total removed
-		[]int{0, 1, 2},
-		3,
-	)
-
-	clearTestingS(t, "Delete before the start",
-		3,              // total keys, 0,1,2
-		-1,             // delete after
-		[]int{0, 1, 2}, // removed
-		[]int{},        // remaining
-		3,
-	)
-	clearTestingS(t, "Delete after the end",
-		3, // total keys, 0,1,2
-		3, // delete to
-		[]int{},
-		[]int{0, 1, 2},
-		3,
-	)
-}
-
 func TestSet(t *testing.T) {
 	s := New[int, int](cmp.Compare)
 	s.Put(0, 0)
@@ -857,4 +539,121 @@ func TestCast(t *testing.T) {
 			t.Fatalf("The object should say it is thread safe!")
 		}
 	}(s)
+}
+
+func TestBetween(t *testing.T) {
+
+	s := New[int, int](cmp.Compare).ToTs()
+	for i := range 3 {
+		s.Put(i, i+3)
+	}
+	_, oka := s.FirstKey()
+	_, okb := s.LastKey()
+	if !oka || !okb {
+		t.Fatalf("first or last key fetch error????")
+	}
+
+	s.RemoveAll()
+	// code coverage
+	s.Between(100, 1000)
+
+	if _, ok := s.FirstKey(); ok {
+		t.Fatalf("Should not be able to fetch FirstKey")
+	}
+	if _, ok := s.FirstKey(); ok {
+		t.Fatalf("Should not be able to fetch LastKey")
+	}
+
+	cb := func() OrderedMap[int, int] {
+		s := NewTs[int, int](cmp.Compare)
+		for i := range 4 {
+			s.Put(i*5, i+111)
+		}
+		return s
+	}
+	betweeTests(
+		t,
+		"between 0 and 5",
+		cb,
+		1, 3, // a,b
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+	)
+
+	betweeTests(
+		t,
+		"Around 0",
+		cb,
+		-400, 3, // a,b
+		true, // ok
+		0,    // expected sum
+		1,    // expected row count
+	)
+	betweeTests(
+		t,
+		"Exact Match 5",
+		cb,
+		5, 5, // a,b
+		true, // ok
+		5,    // expected sum
+		1,    // expected row count
+	)
+	betweeTests(
+		t,
+		"Exact Match 10,15",
+		cb,
+		10, 15, // a,b
+		true, // ok
+		25,   // expected sum
+		2,    // expected row count
+	)
+	betweeTests(
+		t,
+		"Around 15",
+		cb,
+		14, 16, // a,b
+		true, // ok
+		15,   // expected sum
+		1,    // expected row count
+	)
+
+	betweeTests(
+		t,
+		"After tests",
+		cb,
+		16, 16, // a,b
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+	)
+
+	betweeTests(
+		t,
+		"Before tests",
+		cb,
+		-111, -7, // a,b
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+	)
+
+}
+func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b int, ok bool, sum, count int) {
+	s := cb()
+	t.Logf("Starting Test: [%s] with: a: %d, b: %d", name, a, b)
+	check := 0
+	total := 0
+
+	for k, v := range s.BetweenKV(a, b) {
+		t.Logf("  Got Key: %d, Value: %d", k, v)
+		check += k
+		total++
+	}
+	if sum != check && count != total {
+		t.Fatalf("Failed iter test")
+	}
+	if total, res := s.Between(a, b); ok != res || total != count {
+		t.Fatalf("did not get expected value of: %d, got: %d", count, total)
+	}
 }

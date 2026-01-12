@@ -12,7 +12,7 @@ type ThreadSafeOrderedMap[K any, V any] struct {
 }
 
 // Creates a new thread safe OrderedMap.
-func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMap[K, V]) {
+func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMapExt[K, V]) {
 
 	Map = &ThreadSafeOrderedMap[K, V]{
 		Tree: New[K, V](Cmp),
@@ -39,39 +39,39 @@ func (s *ThreadSafeOrderedMap[K, V]) All() iter.Seq2[K, V] {
 	}
 }
 
-// ClearAfter implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearAfter(key K) (total int) {
+// RemoveAfter implements [OrderedMap].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveAfter(key K) (total int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearAfter(key)
+	return s.Tree.RemoveAfter(key)
 }
 
-// ClearAfterS implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearAfterS(key K) (result []*KvSet[K, V]) {
+// RemoveAfterS implements [OrderedMap].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveAfterS(key K) (result []*KvSet[K, V]) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearAfterS(key)
+	return s.Tree.RemoveAfterS(key)
 }
 
-// ClearAll implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearAll() int {
+// RemoveAll implements [OrderedMap].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveAll() int {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearAll()
+	return s.Tree.RemoveAll()
 }
 
-// ClearBefore implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearBefore(key K) (total int) {
+// RemoveBefore implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBefore(key K) (total int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearBefore(key)
+	return s.Tree.RemoveBefore(key)
 }
 
-// ClearBeforeS implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearBeforeS(key K) (result []*KvSet[K, V]) {
+// RemoveBeforeS implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBeforeS(key K) (result []*KvSet[K, V]) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearBeforeS(key)
+	return s.Tree.RemoveBeforeS(key)
 }
 
 // Creates a thread safe iterator for a slice of *KvSet.
@@ -88,56 +88,56 @@ func TsKvIter[K any, V any](set []*KvSet[K, V]) iter.Seq2[K, V] {
 	}
 }
 
-// ClearBeforeI implements [OrderedMap].
+// RemoveBeforeI implements [OrderedMapExt].
 // Returns a thread safe iterator for the deleted values.
-func (s *ThreadSafeOrderedMap[K, V]) ClearBeforeI(key K) iter.Seq2[K, V] {
-	return TsKvIter(s.ClearBeforeS(key))
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBeforeI(key K) iter.Seq2[K, V] {
+	return TsKvIter(s.RemoveBeforeS(key))
 }
 
-// ClearFromI implements [OrderedMap].
+// RemoveFromI implements [OrderedMapExt].
 // Returns a thread safe iterator for the deleted values.
-func (s *ThreadSafeOrderedMap[K, V]) ClearFromI(key K) iter.Seq2[K, V] {
-	return TsKvIter(s.ClearFromS(key))
+func (s *ThreadSafeOrderedMap[K, V]) RemoveFromI(key K) iter.Seq2[K, V] {
+	return TsKvIter(s.RemoveFromS(key))
 }
 
-// ClearAfterI implements [OrderedMap].
+// RemoveAfterI implements [OrderedMapExt].
 // Returns a thread safe iterator for the deleted values.
-func (s *ThreadSafeOrderedMap[K, V]) ClearAfterI(key K) iter.Seq2[K, V] {
-	return TsKvIter(s.ClearAfterS(key))
+func (s *ThreadSafeOrderedMap[K, V]) RemoveAfterI(key K) iter.Seq2[K, V] {
+	return TsKvIter(s.RemoveAfterS(key))
 }
 
-// ClearClearToI implements [OrderedMap].
+// RemoveRemoveToI implements [OrderedMapExt].
 // Returns a thread safe iterator for the deleted values.
-func (s *ThreadSafeOrderedMap[K, V]) ClearToI(key K) iter.Seq2[K, V] {
-	return TsKvIter(s.ClearToS(key))
+func (s *ThreadSafeOrderedMap[K, V]) RemoveToI(key K) iter.Seq2[K, V] {
+	return TsKvIter(s.RemoveToS(key))
 }
 
-// ClearFrom implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearFrom(key K) (total int) {
+// RemoveFrom implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveFrom(key K) (total int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearFrom(key)
+	return s.Tree.RemoveFrom(key)
 }
 
-// ClearFromS implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearFromS(key K) (result []*KvSet[K, V]) {
+// RemoveFromS implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveFromS(key K) (result []*KvSet[K, V]) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearFromS(key)
+	return s.Tree.RemoveFromS(key)
 }
 
-// ClearTo implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearTo(key K) (total int) {
+// RemoveTo implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveTo(key K) (total int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearTo(key)
+	return s.Tree.RemoveTo(key)
 }
 
-// ClearToS implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) ClearToS(key K) (result []*KvSet[K, V]) {
+// RemoveToS implements [OrderedMapExt].
+func (s *ThreadSafeOrderedMap[K, V]) RemoveToS(key K) (result []*KvSet[K, V]) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.ClearToS(key)
+	return s.Tree.RemoveToS(key)
 }
 
 // Exists implements [OrderedMap].
@@ -160,7 +160,6 @@ func (s *ThreadSafeOrderedMap[K, V]) Keys() iter.Seq2[int, K] {
 		pos := 0
 		s.lock.RLock()
 		defer s.lock.RUnlock()
-
 		for {
 			k, _, ok := s.nextKv(pos)
 			if !ok {
@@ -227,12 +226,55 @@ func (s *ThreadSafeOrderedMap[K, V]) ThreadSafe() bool {
 }
 
 func (s *ThreadSafeOrderedMap[K, V]) nextKv(pos int) (key K, value V, ok bool) {
-
 	if s.Tree.Size() > pos && pos > -1 {
 		ok = true
 		key = s.Tree.Slices[pos].Key
 		value = s.Tree.Slices[pos].Value
-
 	}
 	return
+}
+
+// GetFirstKey implements [OrderedMap]
+func (s *ThreadSafeOrderedMap[K, V]) FirstKey() (key K, ok bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	key, ok = s.Tree.FirstKey()
+	return
+}
+
+// GetLastKey implements [OrderedMap]
+func (s *ThreadSafeOrderedMap[K, V]) LastKey() (key K, ok bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	key, ok = s.Tree.LastKey()
+	return
+}
+
+// Between implements [OrderedMap]
+func (s *ThreadSafeOrderedMap[K, V]) Between(a, b K) (total int, ok bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	total, ok = s.Tree.Between(a, b)
+	return
+}
+
+// BetweenKV implements [OrderedMap]
+func (s *ThreadSafeOrderedMap[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
+	return func(yield func(K, V) bool) {
+		s.lock.RLock()
+		defer s.lock.RUnlock()
+		next, stop := iter.Pull2(s.Tree.BetweenKV(a, b))
+		defer stop()
+		for k, v, ok := next(); ok; k, v, ok = next() {
+			if !yield(k, v) {
+				return
+			}
+		}
+	}
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K) (total int) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.Tree.RemoveBetween(a, b)
 }

@@ -1,13 +1,8 @@
-// Yet another sorted map in go.
-//
-// The omap package implements very light minital btree, via an internal slice.
-//
-// Lookups for both reads and writes are always a fixed complexity: o(log n).
-// The internals manage Puts by splicing the slice, without the use of a temporary slice.
 package omap
 
 import (
 	"cmp"
+	"fmt"
 	"iter"
 	"slices"
 )
@@ -134,8 +129,8 @@ func (s *SliceTree[K, V]) clearIdx(idx, offset int) (result bool) {
 	return false
 }
 
-// Clears all elements in the slice, but keeps the memory allocated.
-func (s *SliceTree[K, V]) ClearAll() int {
+// Removes all elements in the slice, but keeps the memory allocated.
+func (s *SliceTree[K, V]) RemoveAll() int {
 	t := len(s.Slices)
 	s.Slices = s.Slices[:0]
 	return t
@@ -185,56 +180,56 @@ func (s *SliceTree[K, V]) clearFrom(key K, x int, cb func(a, b int)) {
 	s.Slices = s.Slices[0:index]
 }
 
-// ClearFrom implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearFrom(key K) (total int) {
+// RemoveFrom implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveFrom(key K) (total int) {
 	s.clearFrom(key, 0, func(a, b int) {
 		total = b - a
 	})
 	return
 }
 
-// ClearFromS implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearFromS(key K) (result []*KvSet[K, V]) {
+// RemoveFromS implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveFromS(key K) (result []*KvSet[K, V]) {
 	s.clearFrom(key, 0, func(a, b int) {
 		result = s.Slices[a:b]
 	})
 	return
 }
 
-// ClearAfterS implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearAfterS(key K) (result []*KvSet[K, V]) {
+// RemoveAfterS implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveAfterS(key K) (result []*KvSet[K, V]) {
 	s.clearFrom(key, 1, func(a, b int) {
 		result = s.Slices[a:b]
 	})
 	return
 }
 
-// ClearAfter implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearAfter(key K) (total int) {
+// RemoveAfter implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveAfter(key K) (total int) {
 	s.clearFrom(key, 1, func(a, b int) {
 		total = b - a
 	})
 	return
 }
 
-// ClearTo implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearTo(key K) (total int) {
+// RemoveTo implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveTo(key K) (total int) {
 	s.clearTo(key, 0, func(a, b int) {
 		total = b - a
 	})
 	return
 }
 
-// ClearBefore implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearBefore(key K) (total int) {
+// RemoveBefore implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveBefore(key K) (total int) {
 	s.clearTo(key, -1, func(a, b int) {
 		total = b - a
 	})
 	return
 }
 
-// ClearToS implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearToS(key K) (result []*KvSet[K, V]) {
+// RemoveToS implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveToS(key K) (result []*KvSet[K, V]) {
 	s.clearTo(key, 0, func(a, b int) {
 		total := b - a
 		if total == 0 {
@@ -245,8 +240,8 @@ func (s *SliceTree[K, V]) ClearToS(key K) (result []*KvSet[K, V]) {
 	return
 }
 
-// ClearBeforeS implements [OrderedMap].
-func (s *SliceTree[K, V]) ClearBeforeS(key K) (result []*KvSet[K, V]) {
+// RemoveBeforeS implements [OrderedMapExt].
+func (s *SliceTree[K, V]) RemoveBeforeS(key K) (result []*KvSet[K, V]) {
 	s.clearTo(key, -1, func(a, b int) {
 		total := b - a
 		if total == 0 {
@@ -575,27 +570,154 @@ func (s *SliceTree[K, V]) contig(totalKeys int, r iter.Seq2[int, int], cb func(a
 // ThreadSafe implements [OrderedMap]
 func (s *SliceTree[K, V]) ThreadSafe() bool { return false }
 
-// ClearBeforeI implements [OrderedMap]
-func (s *SliceTree[K, V]) ClearBeforeI(key K) iter.Seq2[K, V] {
-	return KvIter(s.ClearBeforeS(key))
+// RemoveBeforeI implements [OrderedMapExt]
+func (s *SliceTree[K, V]) RemoveBeforeI(key K) iter.Seq2[K, V] {
+	return KvIter(s.RemoveBeforeS(key))
 }
 
-// ClearFromI implements [OrderedMap]
-func (s *SliceTree[K, V]) ClearFromI(key K) iter.Seq2[K, V] {
-	return KvIter(s.ClearFromS(key))
+// RemoveFromI implements [OrderedMapExt]
+func (s *SliceTree[K, V]) RemoveFromI(key K) iter.Seq2[K, V] {
+	return KvIter(s.RemoveFromS(key))
 }
 
-// ClearAfterI implements [OrderedMap]
-func (s *SliceTree[K, V]) ClearAfterI(key K) iter.Seq2[K, V] {
-	return KvIter(s.ClearAfterS(key))
+// RemoveAfterI implements [OrderedMapExt]
+func (s *SliceTree[K, V]) RemoveAfterI(key K) iter.Seq2[K, V] {
+	return KvIter(s.RemoveAfterS(key))
 }
 
-// ClearAfterI implements [OrderedMap]
-func (s *SliceTree[K, V]) ClearToI(key K) iter.Seq2[K, V] {
-	return KvIter(s.ClearToS(key))
+// RemoveAfterI implements [OrderedMapExt]
+func (s *SliceTree[K, V]) RemoveToI(key K) iter.Seq2[K, V] {
+	return KvIter(s.RemoveToS(key))
 }
 
 // Returns a thread safe instnace from the current instance.
-func (s *SliceTree[K, V]) ToTs() OrderedMap[K, V] {
+func (s *SliceTree[K, V]) ToTs() OrderedMapExt[K, V] {
 	return &ThreadSafeOrderedMap[K, V]{Tree: s}
+}
+
+// GetFirstKey implements [OrderedMap]
+func (s *SliceTree[K, V]) FirstKey() (key K, ok bool) {
+	if s.Size() == 0 {
+		return
+	}
+	key = s.Slices[0].Key
+	ok = true
+	return
+}
+
+// GetLastKey implements [OrderedMap]
+func (s *SliceTree[K, V]) LastKey() (key K, ok bool) {
+	if s.Size() == 0 {
+		return
+	}
+	key = s.Slices[len(s.Slices)-1].Key
+	ok = true
+	return
+}
+
+func (s *SliceTree[K, V]) betweenIter(a, b int) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		if a < 0 {
+			return
+		}
+
+		pos := a
+		for pos < len(s.Slices) && pos <= b {
+			kv := s.Slices[pos]
+			if !yield(kv.Key, kv.Value) {
+				return
+			}
+			pos++
+		}
+	}
+}
+
+func (s *SliceTree[K, V]) betweenChecks(a, b K) (begin, end, total int, ok bool) {
+	if s.Size() == 0 {
+		return
+	}
+
+	begin, c := s.GetIndex(a)
+	//begin = i + o
+	offset := c
+	p := c * c
+	end, d := s.GetIndex(b)
+	p += d * d
+	offset += d
+	//end = i + o
+
+	size := s.Size()
+	final := size - 1
+	if offset*offset == 4 && ((begin+end == final*2) || (begin+end == 0)) {
+		// completly out of our ragne
+		total = 0
+		begin = 0
+		end = 0
+		return
+	}
+	if p == 2 {
+		// if we are in this block we are in a between 2 nodes
+		if begin+1 == end {
+
+			fmt.Printf("Getting here\n")
+			// if we got here.. then the 2 index points are next to each other
+			return
+		}
+	}
+	if end >= size {
+		end = final
+	}
+	if begin < 0 {
+		begin = 0
+	}
+
+	if d < 1 {
+		end += d
+	}
+	if c > 0 {
+		begin += c
+	}
+
+	if begin > end {
+		return
+	}
+
+	total = 1 + end - begin
+	ok = true
+
+	return
+}
+
+// Between implements [OrderedMap]
+func (s *SliceTree[K, V]) Between(a, b K) (total int, ok bool) {
+	_, _, total, ok = s.betweenChecks(a, b)
+	return
+}
+
+// BetweenKV implements [OrderedMap]
+func (s *SliceTree[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
+	x, y, _, ok := s.betweenChecks(a, b)
+	if ok {
+		return s.betweenIter(x, y)
+	} else {
+		return s.betweenIter(-1, -1)
+	}
+
+}
+
+func (s *SliceTree[K, V]) RemoveBetween(a, b K) (total int) {
+	s.clearBetween(a, b, func(x, y, t int, ok bool) {
+		if ok {
+			total = 1 + y - x
+		}
+	})
+	return
+}
+
+func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool)) {
+	begin, end, total, ok := s.betweenChecks(a, b)
+	cb(begin, end, total, ok)
+	if ok {
+		s.Slices = slices.Delete(s.Slices, begin, 1+end)
+	}
 }
