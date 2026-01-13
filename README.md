@@ -131,7 +131,7 @@ __Get all Keys and Values beteen 3 and 11:__
 	}
 ```
 
-__Get all keys and values from the first element to the virtual key 11:__
+__Get all keys and values from the first element, to 11:__
 ```
 	// Note, when opt is set to FIRST_KEY, the value field a is ignored
 	// and the FirstKey is used.
@@ -140,7 +140,7 @@ __Get all keys and values from the first element to the virtual key 11:__
 	}
 ```
 
-__Get all keys and values from the 5 to out last element:__
+__Get all keys and values from 5, to out last element:__
 ```
 	// Note, when opt is set to LAST_KEY, the value field b is ignored
 	// and the LastKey is used.
