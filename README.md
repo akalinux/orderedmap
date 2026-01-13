@@ -9,7 +9,7 @@ The side effect of this design results in what operates exactly like ordered map
 Performance objectives:
   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
   - All iteration operations are fixed cost of o(n).
-  - Finding or removing elements between 2 elements is always a fixed cost of o(log n + log n).
+  - Finding or removing elements between 2 elements is always a fixed cost of o(log(n) + log(n)).
   - Finding elements before or after a given point is always a fixed cost of o(log n)
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
 
