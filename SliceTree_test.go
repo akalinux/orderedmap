@@ -774,3 +774,33 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 	// Make sure this does not blow up
 	s.ThreadSafe()
 }
+
+func TestOperationalSetters(t *testing.T) {
+	s := &SliceTree[int, int]{Cmp: cmp.Compare[int]}
+	s.Put(0, 1)
+
+	// force default fallback growth
+	s.Put(2, 1)
+	// force the itnernals to upgrade the input value
+	s.ToTs().SetGrowth(-1)
+
+	// set a real value
+	s.SetGrowth(100)
+	nv := 0
+	ov := 0
+	s.ToTs().SetOverwrite(func(key, oldValue, newValue int) {
+		ov = oldValue
+		nv = newValue
+	})
+	s.Put(2, -2)
+	if ov == nv {
+		t.Fatalf("Callback did not run!")
+	}
+	nv = 0
+	ov = 0
+	s.Set(0, 3)
+	if ov == nv {
+		t.Fatalf("Callback did not run!")
+	}
+
+}

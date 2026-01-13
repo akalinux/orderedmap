@@ -20,19 +20,15 @@ type SliceTree[K any, V any] struct {
 
 	// Required non nil value, called when ever a value is overwritten.
 	// Seting this funtion saves on having to write a check when data is overwritten.
-	OnOverWrite func(key K, oldValue V, newValue V) V
+	OnOverWrite func(key K, oldValue V, newValue V)
 }
-
-// Stub overwrite method, used by the constructor.  This is the default callback used when a value is overwritten.
-func stubOnOverwrite[K any, V any](key K, oldValue, newValue V) V { return newValue }
 
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
 	return &SliceTree[K, V]{
-		Slices:      make([]*KvSet[K, V], 0, size),
-		Cmp:         cb,
-		Growth:      100,
-		OnOverWrite: stubOnOverwrite[K, V],
+		Slices: make([]*KvSet[K, V], 0, size),
+		Cmp:    cb,
+		Growth: 100,
 	}
 }
 
@@ -84,7 +80,10 @@ func (s *SliceTree[K, V]) Set(index int, v V) (status bool) {
 
 	}
 	el := s.Slices[index]
-	el.Value = s.OnOverWrite(el.Key, el.Value, v)
+	if s.OnOverWrite != nil {
+		s.OnOverWrite(el.Key, el.Value, v)
+	}
+	el.Value = v
 
 	status = true
 	return
@@ -191,7 +190,10 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 			s.Slices[idx] = &KvSet[K, V]{k, v}
 		} else {
 			// overwrite
-			s.Slices[idx].Value = s.OnOverWrite(k, s.Slices[idx].Value, v)
+			if s.OnOverWrite != nil {
+				s.OnOverWrite(k, s.Slices[idx].Value, v)
+			}
+			s.Slices[idx].Value = v
 		}
 
 		return idx
@@ -200,7 +202,12 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 
 func (s *SliceTree[K, V]) grow(size int) {
 	if cap(s.Slices) < size {
-		s.Slices = slices.Grow(s.Slices, s.Growth)
+		grow := s.Growth
+		// be nice to people who make an empty struct
+		if grow <= 0 {
+			grow = 1
+		}
+		s.Slices = slices.Grow(s.Slices, grow)
 	}
 }
 
@@ -625,4 +632,17 @@ func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), op
 // Returns false.
 func (s *SliceTree[K, V]) ThreadSafe() bool {
 	return false
+}
+
+// Sets the internal OnOverWrite function.
+func (s *SliceTree[K, V]) SetOverwrite(cb func(key K, oldValue, newValue V)) {
+	s.OnOverWrite = cb
+}
+
+func (s *SliceTree[K, V]) SetGrowth(grow int) {
+	if grow <= 0 {
+		s.Growth = 1
+		return
+	}
+	s.Growth = grow
 }

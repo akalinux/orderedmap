@@ -219,3 +219,16 @@ func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total in
 	defer s.lock.RUnlock()
 	return s.Tree.RemoveBetween(a, b, opt...)
 }
+
+func (s *ThreadSafeOrderedMap[K, V]) SetOverwrite(cb func(key K, oldValue, newValue V)) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.Tree.SetOverwrite(cb)
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) SetGrowth(grow int) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.Tree.SetGrowth(grow)
+
+}

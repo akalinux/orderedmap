@@ -17,25 +17,25 @@ type OrderedMap[K any, V any] interface {
 	// Returns all the values, the int is expected to be a sequential number
 	Values() iter.Seq2[int, V]
 
-	// Removes all elements.
-	// Returns how many element were removed.
-	RemoveAll() int
-
 	// Returns true if the key exists, false if it does not.
 	Exists(key K) bool
+
+	// Sets the key to the value, returns the index id.
+	Put(key K, value V) (index int)
 
 	// Tries to get the value using the given key.
 	// If the key exists, found is set to true, if the key does not exists then found is set to false.
 	Get(key K) (value V, found bool)
 
-	// Attempts to remove all keys, returns the number of keys removed.
-	MassRemove(keys ...K) (total int)
-
-	// Sets the key to the value, returns the index id.
-	Put(key K, value V) (index int)
-
 	// Tries to remove the given key, returns value is set if ok is true.
 	Remove(key K) (value V, ok bool)
+
+	// Removes all elements.
+	// Returns how many element were removed.
+	RemoveAll() int
+
+	// Attempts to remove all keys, returns the number of keys removed.
+	MassRemove(keys ...K) (total int)
 
 	// Returns the current number of key/value pairs.
 	Size() int
@@ -85,4 +85,10 @@ type OrderedMap[K any, V any] interface {
 	// Merges a given [OrderedMap] into this one.
 	// Returns the number of keys added
 	Merge(set OrderedMap[K, V]) int
+
+	// Sets the overwrite notice.  Its good to know when things change!
+	SetOverwrite(cb func(key K, oldValue, newValue V))
+
+	// Sets the growth value.
+	SetGrowth(grow int)
 }
