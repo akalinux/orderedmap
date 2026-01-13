@@ -69,8 +69,8 @@ Since lookups create both an index position and offsett, it becomes possible to 
 
 ## Getting Keys and Values:
 
-There are several iterators provided by the [OrderedMap](./OrderedMap.go) interface.
-For the full source code to these examples, please look [here](./examples/Iterators/iterators.go).
+There are may ways provided by the [OrderedMap](./OrderedMap.go) interface to fetch data,
+for the full source code to these examples, please look [here](./examples/Iterators/iterators.go).
 
 Create our instance:
 ```
