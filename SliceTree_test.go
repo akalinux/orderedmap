@@ -297,11 +297,11 @@ func showAll(t *testing.T, list []*KvSet[int, int]) {
 func TestRemove(t *testing.T) {
 
 	s := New[int, int](cmp.Compare)
-	if s.Remove(0) {
+	if _, ok := s.Remove(0); ok {
 		t.Fatalf("Should not remove anything")
 	}
 	s.Put(0, 0)
-	if !s.Remove(0) {
+	if _, ok := s.Remove(0); !ok {
 		t.Fatalf("Should have removed our only element!")
 	}
 }
@@ -520,7 +520,7 @@ func TestSet(t *testing.T) {
 		t.Fatalf("Should have been able to fetch index of 0")
 	}
 	if v != 2 {
-		t.Fatalf("Should have been able to fetch index of 0")
+		t.Fatalf("Should have been able to fetch index of 0, expected: 2, got: %d, kv: %v", v, s.Slices[0])
 	}
 	if s.Set(1, 2) {
 		t.Fatalf("should fail to set 1 to 2")
@@ -657,32 +657,71 @@ func TestBetween(t *testing.T) {
 		0,     // expected row count
 	)
 
+	betweeTests(
+		t,
+		"use firstKey, negative test",
+		cb,
+		0, -7, // a,b
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+		FIRST_KEY,
+	)
+
+	betweeTests(
+		t,
+		"use lastKey, negative test",
+		cb,
+		16, -7, // a,b
+		false, // ok
+		0,     // expected sum
+		0,     // expected row count
+		LAST_KEY,
+	)
+
+	betweeTests(
+		t,
+		"use firstkey, up to 11",
+		cb,
+		16, 11, // a,b
+		true, // ok
+		15,   // expected sum
+		3,    // expected row count
+		FIRST_KEY,
+	)
+
 }
-func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b int, ok bool, sum, count int) {
+func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b int, ok bool, sum, count int, opt ...int) {
 	s := cb()
 	t.Logf("Starting Test: [%s] with: a: %d, b: %d", name, a, b)
 	check := 0
 	total := 0
 
-	for k, v := range s.BetweenKV(a, b) {
+	t.Logf(" Lookup check between %d,%d", a, b)
+	for k, v := range s.BetweenKV(a, b, opt...) {
 		t.Logf("  Got Key: %d, Value: %d", k, v)
 		check += k
 		total++
 	}
+	for range s.BetweenKV(a, b, opt...) {
+		// validate the iterator halt operations!
+		break
+	}
+
 	if sum != check && count != total {
 		t.Fatalf("Failed iter test")
 	}
-	if total, res := s.Between(a, b); ok != res || total != count {
+	if total, res := s.Between(a, b, opt...); ok != res || total != count {
 		t.Fatalf("Between, did not get expected value of: %d, got: %d", count, total)
 	}
 
 	res := 0 - sum
-	for k, _ := range s.All() {
+	for k := range s.All() {
 		res += k
 	}
 	size := s.Size() - count
 
-	if total, res := s.RemoveBetween(a, b); ok != res || total != count {
+	if total, res := s.RemoveBetween(a, b, opt...); ok != res || total != count {
 		t.Fatalf("RemoveBetween did not get expected value of: %d, got: %d", count, total)
 	}
 	if size != s.Size() {
@@ -696,4 +735,42 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 		t.Fatalf("Checksum missmatch of keys, expected: %d, got %d", res, total)
 	}
 
+	check = 0
+	total = 0
+	s = cb()
+	seq := s.RemoveBetweenKV(a, b, opt...)
+	t.Logf(" Remove check between %d,%d", a, b)
+	for k, v := range seq {
+		t.Logf("  Got Key: %d, Value: %d", k, v)
+		check += k
+		total++
+	}
+	if sum != check && count != total {
+		t.Fatalf("Failed iter test")
+	}
+	// Validate that the call to yeild works
+	for range seq {
+		break
+	}
+	s.RemoveAll()
+	if s.Exists(0) {
+		t.Fatalf("Element 0 should not exist on an empty set")
+	}
+	if 0 != s.MassRemove(0, 1) {
+		t.Fatalf("mass remove on am empty set should do nothing!")
+	}
+	if _, ok = s.LastKey(); ok {
+		t.Fatalf("Should never get LastKey from an empty set")
+	}
+
+	s.Put(0, 2)
+	if v, ok := s.Get(0); !ok || v != 2 {
+		t.Fatalf("should get the value")
+	}
+	if v, ok := s.Remove(0); !ok || v != 2 {
+		t.Fatalf("Should have removed the value")
+	}
+
+	// Make sure this does not blow up
+	s.ThreadSafe()
 }

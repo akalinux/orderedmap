@@ -46,20 +46,6 @@ func (s *ThreadSafeOrderedMap[K, V]) RemoveAll() int {
 	return s.Tree.RemoveAll()
 }
 
-// Creates a thread safe iterator for a slice of *KvSet.
-func TsKvIter[K any, V any](set []*KvSet[K, V]) iter.Seq2[K, V] {
-	var lock sync.RWMutex
-	return func(yield func(K, V) bool) {
-		lock.RLock()
-		defer lock.RUnlock()
-		for _, row := range set {
-			if !yield(row.Key, row.Value) {
-				return
-			}
-		}
-	}
-}
-
 // Exists implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) Exists(key K) bool {
 	s.lock.RLock()
@@ -108,7 +94,7 @@ func (s *ThreadSafeOrderedMap[K, V]) Put(key K, value V) (index int) {
 }
 
 // Remove implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) Remove(key K) bool {
+func (s *ThreadSafeOrderedMap[K, V]) Remove(key K) (V, bool) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	return s.Tree.Remove(key)
@@ -171,19 +157,19 @@ func (s *ThreadSafeOrderedMap[K, V]) LastKey() (key K, ok bool) {
 }
 
 // Between implements [OrderedMap]
-func (s *ThreadSafeOrderedMap[K, V]) Between(a, b K) (total int, ok bool) {
+func (s *ThreadSafeOrderedMap[K, V]) Between(a, b K, opt ...int) (total int, ok bool) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	total, ok = s.Tree.Between(a, b)
+	total, ok = s.Tree.Between(a, b, opt...)
 	return
 }
 
 // BetweenKV implements [OrderedMap]
-func (s *ThreadSafeOrderedMap[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
+func (s *ThreadSafeOrderedMap[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 	return func(yield func(K, V) bool) {
 		s.lock.RLock()
 		defer s.lock.RUnlock()
-		next, stop := iter.Pull2(s.Tree.BetweenKV(a, b))
+		next, stop := iter.Pull2(s.Tree.BetweenKV(a, b, opt...))
 		defer stop()
 		for k, v, ok := next(); ok; k, v, ok = next() {
 			if !yield(k, v) {
@@ -193,8 +179,29 @@ func (s *ThreadSafeOrderedMap[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
 	}
 }
 
-func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K) (total int, ok bool) {
+func TsKvIterWrapper[K any, V any](seq iter.Seq2[K, V]) iter.Seq2[K, V] {
+	var l sync.RWMutex
+	return func(yield func(K, V) bool) {
+		l.RLock()
+		defer l.RUnlock()
+		next, stop := iter.Pull2(seq)
+		defer stop()
+		for k, v, ok := next(); ok; k, v, ok = next() {
+			if !yield(k, v) {
+				return
+			}
+		}
+	}
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	return s.Tree.RemoveBetween(a, b)
+	return TsKvIterWrapper(s.Tree.RemoveBetweenKV(a, b, opt...))
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.Tree.RemoveBetween(a, b, opt...)
 }

@@ -49,10 +49,16 @@ func (s *SliceTree[K, V]) getMid(size int) int {
 
 // Tries to remove the element of k, returns false if it fails.
 // Complexity: o(log n)
-func (s *SliceTree[K, V]) Remove(k K) bool {
+func (s *SliceTree[K, V]) Remove(k K) (value V, ok bool) {
 
 	idx, offset := s.GetIndex(k)
-	return s.clearIdx(idx, offset)
+	i := idx + offset
+	if i >= 0 && i < len(s.Slices) {
+		value = s.Slices[i].Value
+	}
+
+	ok = s.clearIdx(idx, offset)
+	return
 }
 
 // Sets the key/vale pair and returns the index id.
@@ -79,6 +85,7 @@ func (s *SliceTree[K, V]) Set(index int, v V) (status bool) {
 	}
 	el := s.Slices[index]
 	el.Value = s.OnOverWrite(el.Key, el.Value, v)
+
 	status = true
 	return
 }
@@ -150,8 +157,8 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 	if offset != 0 {
 		ns := size + 1
 		s.grow(ns)
-		s.Slices = append(s.Slices, nil)
 		kv := &KvSet[K, V]{k, v}
+		s.Slices = append(s.Slices, kv)
 		switch idx {
 		case 0:
 			if offset == 1 {
@@ -399,7 +406,6 @@ func (s *SliceTree[K, V]) unsafeIter(keys []K) iter.Seq2[int, int] {
 }
 
 func KvIter[K any, V any](set []*KvSet[K, V]) iter.Seq2[K, V] {
-
 	return func(yield func(K, V) bool) {
 		for _, row := range set {
 			if !yield(row.Key, row.Value) {
@@ -492,22 +498,34 @@ func (s *SliceTree[K, V]) betweenIter(a, b int) iter.Seq2[K, V] {
 	}
 }
 
-func (s *SliceTree[K, V]) betweenChecks(a, b K) (begin, end, total int, ok bool) {
+func (s *SliceTree[K, V]) betweenChecks(a, b K, opt ...int) (begin, end, total int, ok bool) {
 	if s.Size() == 0 {
 		return
 	}
 
-	begin, c := s.GetIndex(a)
-	//begin = i + o
+	var c int
+	var d int
+	if len(opt) == 0 {
+		begin, c = s.GetIndex(a)
+		end, d = s.GetIndex(b)
+	} else {
+		if FIRST_KEY != opt[0]&FIRST_KEY {
+			begin, c = s.GetIndex(a)
+		} else {
+			c = -1
+		}
+		if LAST_KEY == opt[0]&LAST_KEY {
+			end = len(s.Slices) - 1
+		} else {
+			end, d = s.GetIndex(b)
+		}
+	}
 	offset := c
-	end, d := s.GetIndex(b)
 	offset += d
-	//end = i + o
 
 	size := s.Size()
 	final := size - 1
 	if offset*offset == 4 && ((begin+end == final*2) || (begin+end == 0)) {
-		// completly out of our ragne
 		return
 	}
 
@@ -529,14 +547,14 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K) (begin, end, total int, ok bool)
 }
 
 // Between implements [OrderedMap]
-func (s *SliceTree[K, V]) Between(a, b K) (total int, ok bool) {
-	_, _, total, ok = s.betweenChecks(a, b)
+func (s *SliceTree[K, V]) Between(a, b K, opt ...int) (total int, ok bool) {
+	_, _, total, ok = s.betweenChecks(a, b, opt...)
 	return
 }
 
 // BetweenKV implements [OrderedMap]
-func (s *SliceTree[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
-	x, y, _, ok := s.betweenChecks(a, b)
+func (s *SliceTree[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
+	x, y, _, ok := s.betweenChecks(a, b, opt...)
 	if ok {
 		return s.betweenIter(x, y)
 	} else {
@@ -545,29 +563,31 @@ func (s *SliceTree[K, V]) BetweenKV(a, b K) (seq iter.Seq2[K, V]) {
 
 }
 
-func (s *SliceTree[K, V]) RemoveBetween(a, b K) (total int, ok bool) {
+func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
 		if res {
 			total = 1 + y - x
 			ok = res
 		}
-	})
+	}, opt...)
 	return
 }
 
-func (s *SliceTree[K, V]) RemoveBetweenKV(a, b K) (removed iter.Seq2[K, V], ok bool) {
+func (s *SliceTree[K, V]) RemoveBetweenKV(a, b K, opt ...int) (removed iter.Seq2[K, V]) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
 		if res {
-			set := s.Slices[x : y+1]
+			o := y + 1
+			set := slices.Clone(s.Slices[x:o])
 			removed = KvIter(set)
-			ok = res
+		} else {
+			removed = KvIter([]*KvSet[K, V]{})
 		}
-	})
+	}, opt...)
 	return
 }
 
-func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool)) {
-	begin, end, total, ok := s.betweenChecks(a, b)
+func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), opt ...int) {
+	begin, end, total, ok := s.betweenChecks(a, b, opt...)
 	cb(begin, end, total, ok)
 	if ok {
 		s.Slices = slices.Delete(s.Slices, begin, 1+end)

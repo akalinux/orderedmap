@@ -31,8 +31,8 @@ type Map[K any, V any] interface {
 	// Sets the key to the value, returns the index id.
 	Put(key K, value V) (index int)
 
-	// Tries to remove the given key, returns false if the key does not exist.
-	Remove(key K) bool
+	// Tries to remove the given key, returns value is set if ok is true.
+	Remove(key K) (value V, ok bool)
 
 	// Sets the value at a given index point.
 	Size() int
