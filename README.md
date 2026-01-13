@@ -1,25 +1,25 @@
- # OMAP OrderMap
- Yet another sorted map in go.. but not really.
+# OMAP OrderMap
+Yet another sorted map in go.. but not really.
 
- Technically the omap package implements very minital btree using a slice.
- The btree implementation is ordered and does not allow for duplicates;
- The internals manage keys by splicing the internal slice, without the use of a temporary slice.
- The side effect of this design results in what operates exactly like ordered map.
+Technically the omap package implements very minital btree using a slice.
+The btree implementation is ordered and does not allow for duplicates;
+The internals manage keys by splicing the internal slice, without the use of a temporary slice.
+The side effect of this design results in what operates exactly like ordered map.
 
- Performance objectives:
-   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
-   - All iteration operations are fixed cost of o(n).
-   - Finding or removing elements between 2 elements is always a fixed cost of o(log n + log n).
-   - Finding elements before or after a given point is always a fixed cost of o(log n)
-   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
+Performance objectives:
+  - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
+  - All iteration operations are fixed cost of o(n).
+  - Finding or removing elements between 2 elements is always a fixed cost of o(log n + log n).
+  - Finding elements before or after a given point is always a fixed cost of o(log n)
+  - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
 
- The omap package provides, implementations of the[OrderedMap](./OrderedMap.go) interface:
+The omap package provides a common interface [OrderedMap] implemented by the following
    - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go)
    - Not thread safe [SliceTree](./SliceTree.go)
 
- ## Basic usage
+## Basic usage
 
- Creating ThreadSafe instance Example:
+Creating ThreadSafe instance Example:
 
 ```
 	kv:=NewTs[string,string](cmp.Compare)
@@ -33,11 +33,11 @@
 	}
 ```
 
- The resulting output will be:
+The resulting output will be:
 ```
 	"Hello World!\n"
 ```
- We can now make things a bit smaller by removing things by a range.
+We can now make things a bit smaller by removing things by a range.
  ```
 // Note, both "Sell" and "Universe", were never added to the instance,
 // but the between operation works on these keys any ways.
@@ -48,7 +48,7 @@ for k,v :=range kv.All {
     fmt.Printf("%s%s\n",k,v)
 }
 ```
- The resulting output will now be:
+The resulting output will now be:
 
 	"Hello \n"
 

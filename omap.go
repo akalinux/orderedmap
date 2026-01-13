@@ -12,7 +12,7 @@
 //   - Finding elements before or after a given point is always a fixed cost of o(log n)
 //   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
 //
-// There are 2 Implementations provided by omap, both implement [OrderedMap] :
+// The omap package provides a common interface [OrderedMap] implemented by the following:
 //   - Thread safe [ThreadSafeOrderedMap]
 //   - Not thread safe [SliceTree]
 //
