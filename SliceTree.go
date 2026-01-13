@@ -330,8 +330,8 @@ func (s *SliceTree[K, V]) Values() iter.Seq2[int, V] {
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
 func (s *SliceTree[K, V]) All() iter.Seq2[K, V] {
-	pos := 0
 	return func(yield func(K, V) bool) {
+		pos := 0
 		for pos < len(s.Slices) {
 			kv := s.Slices[pos]
 			if !yield(kv.Key, kv.Value) {
@@ -471,6 +471,32 @@ func (s *SliceTree[K, V]) FirstKey() (key K, ok bool) {
 	return
 }
 
+// Merges a map into an OrderedMap instance.
+func Merge[K comparable, V any](dst OrderedMap[K, V], src map[K]V) int {
+	count := 0
+	// is this worth trying to optimize?
+	for k, v := range src {
+		count++
+		dst.Put(k, v)
+	}
+	return count
+}
+
+// Merge implements [OrderedMap]
+func (s *SliceTree[K, V]) Merge(set OrderedMap[K, V]) int {
+	count := 0
+	// do not add to ourself!
+	if s == set {
+		return 0
+	}
+	// is this worth trying to optimize?
+	for k, v := range set.All() {
+		count++
+		s.Put(k, v)
+	}
+	return count
+}
+
 // GetLastKey implements [OrderedMap]
 func (s *SliceTree[K, V]) LastKey() (key K, ok bool) {
 	if s.Size() == 0 {
@@ -563,6 +589,7 @@ func (s *SliceTree[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 
 }
 
+// RemoveBetween implements [OrderedMap]
 func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
 		if res {
@@ -573,6 +600,7 @@ func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool)
 	return
 }
 
+// RemoveBetween implements [OrderedMap]
 func (s *SliceTree[K, V]) RemoveBetweenKV(a, b K, opt ...int) (removed iter.Seq2[K, V]) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
 		if res {
@@ -594,6 +622,7 @@ func (s *SliceTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), op
 	}
 }
 
+// Returns false.
 func (s *SliceTree[K, V]) ThreadSafe() bool {
 	return false
 }

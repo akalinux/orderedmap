@@ -16,9 +16,9 @@
 //   - Thread safe [ThreadSafeOrderedMap]
 //   - Not thread safe [SliceTree]
 //
-// Creating ThreadSafe instance Example:
+// Basic Example:
 //
-//	kv:=NewTs[string,string](cmp.Compare)
+//	kv:=New[string,string](cmp.Compare)
 //	// Save a value
 //	kv.Put("Hello"," ")
 //	kv.Put("World","!\n")

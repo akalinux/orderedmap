@@ -11,7 +11,7 @@ type ThreadSafeOrderedMap[K any, V any] struct {
 	lock sync.RWMutex
 }
 
-// Creates a new thread safe OrderedMap.
+// Creates a new thread safe [OrderedMap] instance.
 func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMap[K, V]) {
 
 	Map = &ThreadSafeOrderedMap[K, V]{
@@ -84,6 +84,17 @@ func (s *ThreadSafeOrderedMap[K, V]) MassRemove(keys ...K) (total int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	return s.Tree.MassRemove(keys...)
+}
+
+// Merge implements [OrderedMap]
+func (s *ThreadSafeOrderedMap[K, V]) Merge(set OrderedMap[K, V]) int {
+	if s == set {
+		// do not merge onto ourself!
+		return 0
+	}
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	return s.Tree.Merge(set)
 }
 
 // Put implements [OrderedMap].
@@ -179,6 +190,7 @@ func (s *ThreadSafeOrderedMap[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq
 	}
 }
 
+// Takes an existing K,V iterator and returns a thread safe version.
 func TsKvIterWrapper[K any, V any](seq iter.Seq2[K, V]) iter.Seq2[K, V] {
 	var l sync.RWMutex
 	return func(yield func(K, V) bool) {
@@ -194,12 +206,14 @@ func TsKvIterWrapper[K any, V any](seq iter.Seq2[K, V]) iter.Seq2[K, V] {
 	}
 }
 
+// RemoveBetweenKV implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) RemoveBetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	return TsKvIterWrapper(s.Tree.RemoveBetweenKV(a, b, opt...))
 }
 
+// RemoveBetween implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()

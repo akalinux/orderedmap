@@ -37,3 +37,45 @@ func TestLockIters(t *testing.T) {
 	}
 
 }
+
+func TestMerge(t *testing.T) {
+	dst := NewTs[int, int](cmp.Compare)
+	src := NewTs[int, int](cmp.Compare)
+	for i := range 3 {
+		src.Put(i, i+3)
+	}
+
+	if check := dst.Merge(src); check != src.Size() {
+		t.Fatalf("Expected size to be: %d, got %d", src.Size(), check)
+	}
+
+	if check := src.Merge(src); check != 0 {
+		t.Fatalf("Should not be able to merge onto an ourself")
+	}
+
+	if src.Size() != dst.Size() {
+		t.Fatalf("Source and dst do not match")
+	}
+	next, stop := iter.Pull2(dst.All())
+	defer stop()
+	for k, v := range dst.All() {
+		x, y, ok := next()
+		if x != k || y != v || !ok {
+			t.Fail()
+		}
+	}
+	stop()
+	dst = NewTs[int, int](cmp.Compare)
+
+	m := map[int]int{1: 2}
+	if count := Merge(dst, m); count != 1 {
+		t.Fail()
+	}
+	if v, ok := dst.Get(1); !ok || v != 2 {
+		t.Fail()
+	}
+
+	dst = New[int, int](cmp.Compare)
+	dst.Merge(dst)
+
+}
