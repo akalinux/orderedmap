@@ -66,6 +66,7 @@ Since lookups create both an index position and offsett, it becomes possible to 
   - Elements before the array
   - Positions between elements of the array
   - Elements after the array
+  - Elements to overwrite
 
 ## Getting Keys and Values:
 
