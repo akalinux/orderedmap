@@ -28,6 +28,11 @@ func main() {
 		fmt.Printf("First Key: %d\n", key)
 	}
 
+	// Get a valye by key
+	if value, ok := s.Get(0); ok {
+		fmt.Printf("Got: [%s]\n", value)
+	}
+
 	// Get our last element
 	key, ok = s.LastKey()
 	if ok {

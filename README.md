@@ -13,7 +13,7 @@
    - Finding elements before or after a given point is always a fixed cost of o(log n)
    - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
 
- There are 2 Implementations provided by omap, both implement [OrderedMapExt](./OrderedMap.go) :
+ There are 2 Implementations provided by omap, both implement [OrderedMap](./OrderedMap.go) :
    - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go)
    - Not thread safe [SliceTree](./SliceTree.go)
 
@@ -80,6 +80,13 @@ Create our instance:
   }
 ```
 
+Get a valye by key:
+```
+	if value, ok := s.Get(0); ok {
+		fmt.Printf("Got: [%s]\n", value)
+	}
+```
+
 Get our first key:
 ```
 	key, ok := s.FirstKey()
@@ -132,7 +139,7 @@ Get all keys and values from the first element to the virtual key 11:
 	}
 ```
 
-Get all keys and values from the 5 to out last element
+Get all keys and values from the 5 to out last element:
 ```
 	// Note, when the opt is set to LAST_KEY, the value field b is ignored
 	// and the LastKey is used.
