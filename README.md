@@ -133,7 +133,7 @@ __Get all Keys and Values beteen 3 and 11:__
 
 __Get all keys and values from the first element to the virtual key 11:__
 ```
-	// Note, when the opt is set to FIRST_KEY, the value field a is ignored
+	// Note, when opt is set to FIRST_KEY, the value field a is ignored
 	// and the FirstKey is used.
 	for key, value := range s.BetweenKV(1000, 11, omap.FIRST_KEY) {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
@@ -142,7 +142,7 @@ __Get all keys and values from the first element to the virtual key 11:__
 
 __Get all keys and values from the 5 to out last element:__
 ```
-	// Note, when the opt is set to LAST_KEY, the value field b is ignored
+	// Note, when opt is set to LAST_KEY, the value field b is ignored
 	// and the LastKey is used.
 	for key, value := range s.BetweenKV(10, 0, omap.LAST_KEY) {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
