@@ -4,7 +4,7 @@
  Technically the omap package implements very minital btree using a slice.
  The btree implementation is ordered and does not allow for duplicates;
  The internals manage keys by splicing the internal slice, without the use of a temporary slice.
- The side effect of this design results in what operates like ordered map.
+ The side effect of this design results in what operates exactly like ordered map.
 
  Performance objectives:
    - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
