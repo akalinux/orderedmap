@@ -72,7 +72,7 @@ Since lookups create both an index position and offsett, it becomes possible to 
 There are may ways provided by the [OrderedMap](./OrderedMap.go) interface to fetch data,
 for the full source code to these examples, please look [here](./examples/Iterators/iterators.go).
 
-Create our instance:
+__Create our instance:__
 ```
   s:=omap.New[int,int](cmp.Compare)
   for i := range 5 {
@@ -80,21 +80,22 @@ Create our instance:
   }
 ```
 
-Get a valye by key:
+__Get a value by key:__
 ```
 	if value, ok := s.Get(0); ok {
 		fmt.Printf("Got: [%s]\n", value)
 	}
 ```
 
-Get our first key:
+__Get our first key:__
 ```
 	key, ok := s.FirstKey()
 	if ok {
 		fmt.Printf("First Key: %d\n", key)
 	}
 ```
-Get our last Key:
+
+__Get our last Key:__
 ```
 	key, ok = s.LastKey()
 	if ok {
@@ -102,35 +103,35 @@ Get our last Key:
 	}
 ```
 
-Get all keys
+__Get all keys:__
 ```
 	for i, key := range s.Keys() {
 		fmt.Printf("  ID: %d, Key: %d\n", i, key)
 	}
 ```
 
-Get all values
+__Get all values:__
 ```
 	for i, value := range s.Values() {
 		fmt.Printf("  ID: %d, String: [%s]\n", i, value)
 	}
 ```
 
-Get All Keys and values:
+__Get All Keys and values:__
 ```
 	for key, value := range s.All() {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
 	}
 ```
 
-Get all Keys and Values beteen 3 and 11:
+__Get all Keys and Values beteen 3 and 11:__
 ```
 	for key, value := range s.BetweenKV(3, 11) {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
 	}
 ```
 
-Get all keys and values from the first element to the virtual key 11:
+__Get all keys and values from the first element to the virtual key 11:__
 ```
 	// Note, when the opt is set to FIRST_KEY, the value field a is ignored
 	// and the FirstKey is used.
@@ -139,7 +140,7 @@ Get all keys and values from the first element to the virtual key 11:
 	}
 ```
 
-Get all keys and values from the 5 to out last element:
+__Get all keys and values from the 5 to out last element:__
 ```
 	// Note, when the opt is set to LAST_KEY, the value field b is ignored
 	// and the LastKey is used.
