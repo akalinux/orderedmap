@@ -367,6 +367,10 @@ func (s *SliceTree[K, V]) All() iter.Seq2[K, V] {
 //   - child index is created to de-duplicate and order keys for deletion: o(log k)
 //   - key deletion is done in contiguous blocks: k
 func (s *SliceTree[K, V]) MassRemove(args ...K) (total int) {
+	return s.massremove(args, s.rangedel)
+}
+
+func (s *SliceTree[K, V]) massremove(args []K, cb func(a, b int)) int {
 	if len(s.Slices) == 0 {
 		return 0
 	}
@@ -379,10 +383,29 @@ func (s *SliceTree[K, V]) MassRemove(args ...K) (total int) {
 		f.Put(i, nil)
 	}
 
-	total = f.Size()
-	s.contig(total, f.Keys(), s.rangedel)
+	s.contig(f.Size(), f.Keys(), cb)
+	return f.Size()
+}
 
-	return
+func (s *SliceTree[K, V]) MassRemoveKV(args ...K) iter.Seq2[K, V] {
+	// worst case is the len of args.. so we always pre-allocate for worst case
+	list := make([][]*KvSet[K, V], 0, len(args))
+	s.massremove(args, func(a, b int) {
+		list = append(list, slices.Clone(s.Slices[a:b+1]))
+		s.rangedel(a, b)
+	})
+	return func(yield func(K, V) bool) {
+		/// outer loop is in reverse order
+		for i := len(list) - 1; i > -1; i-- {
+			// inner loop is in forward order
+			for _, kv := range list[i] {
+				if !yield(kv.Key, kv.Value) {
+					return
+				}
+			}
+		}
+	}
+
 }
 
 // This method is by defenition, unsafe, but fast.

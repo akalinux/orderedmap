@@ -458,10 +458,29 @@ func TestMassRemove(t *testing.T) {
 	if len(s.Slices) != 0 {
 		t.Fatalf("Should be empty")
 	}
-	s = New[int, int](cmp.Compare)
-	for i := range 15 {
-		s.Put(i, 0)
+	b := New[int, int](cmp.Compare).ToTs()
+	for i := range 5 {
+		b.Put(i, i*-1)
 	}
+	res := b.MassRemoveKV(1, 2, 4)
+	crc := 0
+	for k, v := range res {
+		crc += k + v + 1
+		t.Logf("Removed Key: %d, value %d", k, v)
+
+	}
+	if crc != 3 {
+		t.Fatalf("Failed to remove our keys, Expected 3, got: %d", crc)
+	}
+	crc = 0
+	for k, v := range b.All() {
+		crc += k + v + 1
+		t.Logf("Have Key: %d, value %d", k, v)
+	}
+	if crc != 2 {
+		t.Fatalf("Failed to remove our keys, Expected 2, got: %d", crc)
+	}
+
 }
 
 func TestUnsafeRemove(t *testing.T) {

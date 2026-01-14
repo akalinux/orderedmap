@@ -37,6 +37,9 @@ type OrderedMap[K any, V any] interface {
 	// Attempts to remove all keys, returns the number of keys removed.
 	MassRemove(keys ...K) (total int)
 
+	// Attempts to remove all keys, returns an iterator with the key/value pairs
+	MassRemoveKV(keys ...K) iter.Seq2[K, V]
+
 	// Returns the current number of key/value pairs.
 	Size() int
 

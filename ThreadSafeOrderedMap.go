@@ -86,6 +86,12 @@ func (s *ThreadSafeOrderedMap[K, V]) MassRemove(keys ...K) (total int) {
 	return s.Tree.MassRemove(keys...)
 }
 
+func (s *ThreadSafeOrderedMap[K, V]) MassRemoveKV(keys ...K) iter.Seq2[K, V] {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	return TsKvIterWrapper(s.Tree.MassRemoveKV(keys...))
+}
+
 // Merge implements [OrderedMap]
 func (s *ThreadSafeOrderedMap[K, V]) Merge(set OrderedMap[K, V]) int {
 	if s == set {
@@ -220,6 +226,7 @@ func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total in
 	return s.Tree.RemoveBetween(a, b, opt...)
 }
 
+// SetOverwrite implements [OrderedMap]
 func (s *ThreadSafeOrderedMap[K, V]) SetOverwrite(cb func(key K, oldValue, newValue V)) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
