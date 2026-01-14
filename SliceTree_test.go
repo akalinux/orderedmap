@@ -10,25 +10,22 @@ func LookString(nextBegin, nextEnd, nextMid, offset int, resolved bool) string {
 	return fmt.Sprintf("nextBegin: %d, nextEnd: %d, nextMid: %d, offset: %d, resolved: %v", nextBegin, nextEnd, nextMid, offset, resolved)
 }
 func TestMid(t *testing.T) {
-	s := NewSliceTree[int, int](1, func(a, b int) int {
-		return cmp.Compare(a, b)
-	})
-	if check := s.getMid(3); check != 1 {
+	if check := getMid(3); check != 1 {
 		t.Fatalf("Expected: 1, got : %d", check)
 	}
-	if check := s.getMid(2); check != 0 {
+	if check := getMid(2); check != 0 {
 		t.Fatalf("Expected: 0, got : %d", check)
 	}
-	if check := s.getMid(1); check == -1 {
+	if check := getMid(1); check == -1 {
 		t.Fatalf("Expected: -1, got : %d", check)
 	}
-	if check := s.getMid(0); check == -2 {
+	if check := getMid(0); check == -2 {
 		t.Fatalf("Expected: -2, got : %d", check)
 	}
-	if check := s.getMid(10); check != 4 {
+	if check := getMid(10); check != 4 {
 		t.Fatalf("Expected: 4, got : %d", check)
 	}
-	if check := s.getMid(5); check != 2 {
+	if check := getMid(5); check != 2 {
 		t.Fatalf("Expected: 2, got : %d", check)
 	}
 }
