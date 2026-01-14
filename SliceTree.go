@@ -236,6 +236,7 @@ func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 	end := len(s.Slices) - 1
 	begin := 0
 	var resolved bool
+	var diff int
 	for {
 		offset = Cmp(k, Slices[mid].Key)
 		switch offset {
@@ -243,7 +244,7 @@ func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 			resolved = true
 		case -1:
 			end = mid - 1
-			diff := end - begin
+			diff = end - begin
 
 			if diff <= 0 {
 				resolved = true
