@@ -2,7 +2,6 @@ package omap
 
 import (
 	"cmp"
-	"fmt"
 	"iter"
 	"slices"
 )
@@ -268,7 +267,7 @@ func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 				resolved = offset == 0
 			}
 		}
-		fmt.Printf("diff: %d\n", diff)
+
 		if resolved {
 			index = offset + mid
 			if index < 0 {
