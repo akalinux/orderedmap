@@ -3,3 +3,5 @@ cover.html
 coverage.out
 sig
 nohup.out
+cpu.pprof
+orderedmap.test

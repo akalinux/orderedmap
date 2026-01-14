@@ -38,7 +38,7 @@ func New[K any, V any](cb func(a, b K) int) *SliceTree[K, V] {
 	return NewSliceTree[K, V](100, cb)
 }
 
-func (s *SliceTree[K, V]) getMid(size int) int {
+func getMid(size int) int {
 	// shift right 1 same sa divide  by 2.. gotta love int maths
 	return (size-2)>>1 + size&1
 }
@@ -223,78 +223,60 @@ func (s *SliceTree[K, V]) grow(size int) {
 // Complexity: o(log n)
 func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 
-	size := len(s.Slices)
-	switch size {
+	Cmp := s.Cmp
+	Slices := s.Slices
+	end := len(Slices)
+	switch end {
 	case 0:
 		return 0, 0
 	case 1:
-		return 0, s.Cmp(k, s.Slices[0].Key)
+		return 0, Cmp(k, Slices[0].Key)
 	}
-	w := &resolveNext[K]{
-		mid: s.getMid(size),
-		key: k,
-		end: len(s.Slices) - 1,
-	}
-
+	mid := getMid(end)
+	end--
+	begin := 0
+	var resolved bool
+	var diff int
 	for {
-		s.resolveNext(w)
-		if w.resolved {
-			//index = offset + nextMid
-			index = w.offset + w.mid
-			if index < 0 {
-				return w.mid, w.offset
+		offset = Cmp(k, Slices[mid].Key)
+		switch offset {
+		case 0:
+			resolved = true
+		case -1:
+			end = mid - 1
+			diff = end - begin
+
+			if diff <= 0 {
+				resolved = true
+				offset = -1
+			} else {
+				mid = begin + getMid(diff+1)
+				offset = Cmp(Slices[mid].Key, k)
+				resolved = offset == 0
 			}
-			offset = s.Cmp(k, s.Slices[index].Key)
-			break
+		case 1:
+			begin = mid + 1
+			diff := end - begin
+
+			if diff <= 0 {
+				resolved = true
+				offset = 1
+			} else {
+				mid = begin + getMid(diff+1)
+				offset = Cmp(Slices[mid].Key, k)
+				resolved = offset == 0
+			}
+		}
+
+		if resolved {
+			index = offset + mid
+			if index < 0 {
+				return mid, offset
+			}
+			offset = Cmp(k, Slices[index].Key)
+			return
 		}
 	}
-	return
-}
-
-func (s *SliceTree[K, V]) lookAhead(w *resolveNext[K]) {
-	w.begin = w.mid + 1
-	diff := w.end - w.begin
-
-	if diff <= 0 {
-		w.resolved = true
-		w.offset = 1
-		return
-	}
-	w.mid = w.begin + s.getMid(diff+1)
-	w.offset = s.Cmp(s.Slices[w.mid].Key, w.key)
-	w.resolved = w.offset == 0
-}
-
-func (s *SliceTree[K, V]) lookBehind(w *resolveNext[K]) {
-	//nextEnd = mid - 1
-	w.end = w.mid - 1
-	//diff := nextEnd - begin
-	diff := w.end - w.begin
-
-	if diff <= 0 {
-		w.resolved = true
-		w.offset = -1
-		return
-	}
-	w.mid = w.begin + s.getMid(diff+1)
-	w.offset = s.Cmp(s.Slices[w.mid].Key, w.key)
-	w.resolved = w.offset == 0
-}
-
-func (s *SliceTree[K, V]) resolveNext(w *resolveNext[K]) {
-
-	w.offset = s.Cmp(w.key, s.Slices[w.mid].Key)
-	switch w.offset {
-	case 0:
-		w.resolved = true
-		return
-	case -1:
-		s.lookBehind(w)
-	case 1:
-		s.lookAhead(w)
-	}
-
-	return
 }
 
 // Returns an iterator for the current keys.
