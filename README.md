@@ -147,8 +147,32 @@ Example using s.BetweenKV:
 ```
 Returns all values up to "Tomorrow".
 
+## Benchmarks
 
-
+```
+BenchmarkNew-10                 1000000000               0.1787 ns/op
+BenchmarkNewFromMap-10           2085387               562.5 ns/op
+BenchmarkToMap-10                3864132               313.7 ns/op
+BenchmarkPut-10                 199774635                5.758 ns/op
+BenchmarkGet-10                 258267082                4.707 ns/op
+BenchmarkKeys-10                83097054                13.31 ns/op
+BenchmarkValues-10              85411525                13.36 ns/op
+BenchmarkAll-10                 87818228                13.35 ns/op
+BenchmarkSize-10                1000000000               0.8899 ns/op
+BenchmarkMerge-10                4816341               249.6 ns/op
+BenchmarkBetween-10             86252847                14.29 ns/op
+BenchmarkBetweenKV-10           41012466                28.58 ns/op
+BenchmarkMergeMap-10             4135570               289.5 ns/op
+BenchmarkBetweenFirst-10        100000000               10.84 ns/op
+BenchmarkBetweenLast-10         100000000               10.85 ns/op
+BenchmarkBetweenFirstKV-10      44594184                26.18 ns/op
+BenchmarkBetweenLastKV-10       44527660                26.14 ns/op
+BenchmarkMassRemove-10           2717736               435.2 ns/op
+BenchmarkRemoveAll-10           1000000000               0.7727 ns/op
+BenchmarkMassRemoveKV-10         2466362               490.4 ns/op
+BenchmarkRemoveBetween-10       59023917                20.15 ns/op
+BenchmarkRemoveBetweenKV-10     34702495                34.01 ns/op
+```
 
 
 
