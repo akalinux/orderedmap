@@ -121,5 +121,38 @@ The following table provides a general overview of the methods in OrderedMap.
 | FirstKey | | key K, ok bool | When ok is true the first key in the instance is returned |
 | LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
 | Between | a,b K, opt ...int| total int | Returns the number of elements between a and b. For options  [See](#between-options) |
-
+| BetweenKV | a,b K, opt ...int|  iter.Seq2[int, K] | Returns an iterator that contains the key/value pairs between a and b. For options  [See](#between-options) |
+| RemoveBetween | a,b K, opt ...int| int | Returns the number of elements removed between a and b. For options  [See](#between-options) |
+| RemoveBetweenKV | a,b K, opt ...int|  iter.Seq2[int, K] | Returns an iterator that contains the key/value pairs that were moved from between a and b. For options  [See](#between-options) |
+| ThreadSafe | | bool | Returns true if this instance is thread safe |
+| Merge | set OrderedMap[K, V] |int | Merges set into this instance |
+| SetOverwrite | cb func(key K, oldValue, newValue V) | | Sets the callback method that fires before a value is overwritten |
+| SetGrowth | grow int| | Sets the internal growth value for the slice |
+| ToTs() | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper |
 ### Between Options
+
+The following table exlains the usage and possible values for functions that support between operations.
+
+| opt[id] | Options | Description |
+|-|-|-|
+| 0 | omap.FIRST_KEY | When set, the a field is ignored and s.FirstKey is used in its place |
+| 0 | omap.LAST_KEY | When set, the b field is ignored and s.LastKey is used in its place |
+| 0 | omap.FIRST_KEY+omap.LAST_KEY | This causes both a and b to be ignored |
+
+Example using s.BetweenKV:
+```go
+  for k,v :=s.BetweenKV("","Tomorrow",omap.FIRSTKEY) {
+    fmt.Printf("Key: [%s], Value: [%d]\n")
+  }
+```
+Returns all values up to "Tomorrow".
+
+
+
+
+
+
+
+
+
+
