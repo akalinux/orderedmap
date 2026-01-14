@@ -47,7 +47,7 @@ type OrderedMap[K any, V any] interface {
 	FirstKey() (key K, ok bool)
 
 	// If ok is true, returns the last key.
-	LastKey() (K, bool)
+	LastKey() (key K, ok bool)
 
 	// Returns total number of elements between a and b.
 	// Neither a or b are required to exist.
@@ -56,7 +56,7 @@ type OrderedMap[K any, V any] interface {
 	//  - When: opt[0]==omap.FIRST_KEY, a is ignored and the FirstKey is used.
 	//  - When: opt[0]==omap.LAST_KEY, b is ignored and the LastKey is used.
 	//  - To Ignore both a and b, set: opt[0]==omap.FIRST_KEY|omap.LAST_KEY.
-	Between(a, b K, opt ...int) (total int, ok bool)
+	Between(a, b K, opt ...int) (total int)
 
 	// Returns an iterator that contains the key value sets between a and b.
 	// Neither a or b are required to exist.
@@ -74,7 +74,7 @@ type OrderedMap[K any, V any] interface {
 	//  - When: opt[0]==omap.FIRST_KEY, a is ignored and the FirstKey is used.
 	//  - When: opt[0]==omap.LAST_KEY, b is ignored and the LastKey is used.
 	//  - To Ignore both a and b, set: opt[0]==omap.FIRST_KEY|omap.LAST_KEY.
-	RemoveBetween(a, b K, opt ...int) (total int, ok bool)
+	RemoveBetween(a, b K, opt ...int) (total int)
 
 	// Trys to delete the elements between a and b, returns an iterator that contains removed K,V pairs.
 	// Neither a or b are required to exist.
@@ -94,4 +94,8 @@ type OrderedMap[K any, V any] interface {
 
 	// Sets the growth value.
 	SetGrowth(grow int)
+
+	// Returns a thread safe instance.
+	// If the instance is all ready thread safe, then the current instance is returned.
+	ToTs() OrderedMap[K, V]
 }

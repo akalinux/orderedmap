@@ -727,7 +727,7 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 	if sum != check && count != total {
 		t.Fatalf("Failed iter test")
 	}
-	if total, res := s.Between(a, b, opt...); ok != res || total != count {
+	if total := s.Between(a, b, opt...); total != count {
 		t.Fatalf("Between, did not get expected value of: %d, got: %d", count, total)
 	}
 
@@ -737,7 +737,7 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 	}
 	size := s.Size() - count
 
-	if total, res := s.RemoveBetween(a, b, opt...); ok != res || total != count {
+	if total = s.RemoveBetween(a, b, opt...); total != count {
 		t.Fatalf("RemoveBetween did not get expected value of: %d, got: %d", count, total)
 	}
 	if size != s.Size() {

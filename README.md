@@ -13,8 +13,6 @@ Performance objectives:
   - Finding or removing elements between 2 points is always a fixed cost of o(log(n) + log(n)).
   - Finding elements before or after a given point is always a fixed cost of o(log n)
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
-  - Key/Value pairs are kept in a struct container, the underlying slice only holds a refernce to the struct, so all splice operations operate on pointer manipulation.
-  - Dynamic overwrite notice without lookup operations, this is done by setthing the OnOverWrite method.
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
 The omap package provides a common interface [OrderedMap](OrderedMap.go) implemented by the following:
@@ -48,7 +46,7 @@ We can now make things a bit smaller by removing things by a range.
 kv.RemoveBetween("Sell","Universe")
 
 // Itertor
-for k,v :=range kv.All {
+for k,v :=range kv.All() {
     fmt.Printf("%s%s\n",k,v)
 }
 ```
@@ -72,85 +70,56 @@ Since lookups create both an index position and offsett, it becomes possible to 
   - Elements after the array
   - Elements to overwrite
 
-## Getting Keys and Values:
+## API
 
-There are may ways provided by the [OrderedMap](./OrderedMap.go) interface to fetch data,
-for the full source code to these examples, please look [here](./examples/Iterators/iterators.go).
+__Constructors__
 
-__Create our instance:__
-```
-  s:=omap.New[int,int](cmp.Compare)
-  for i := range 5 {
-    s.Put(i*5,fmt.Sprintf"")
-  }
-```
 
-__Get a value by key:__
-```
-	if value, ok := s.Get(0); ok {
-		fmt.Printf("Got: [%s]\n", value)
-	}
-```
+The omap package supports any key type you can provide a compare function for, but a map in go only supports a comparable key type.  This means any map can be converted to an OrderedMap instance, but not every OrderedMap instance can be converted to a map.  
+| Function | Types | Arguments | Returns | Thread Safe |
+|-----|------------|--------|-|-|
+| omap.New | K any, V any| func(a, b K) int | *SliceTree[K, V] | false|
+| omap.NewFromMap |[K comparable, V any]| map[K]V, func(a, b K) int |*SliceTree[K, V] |false |
+| omap.NewSliceTree | K any, V any | int, func(a, b K) int | *SliceTree[K, V] | false |
+| omap.NewTs | K any, V any | func(a, b K) int | OrderedMap[K, V] | true |
+| omap.ToMap | K comparable, V any | OrderedMap[K, V]| map[K]V | false |
 
-__Get our first key:__
-```
-	key, ok := s.FirstKey()
-	if ok {
-		fmt.Printf("First Key: %d\n", key)
-	}
+As a note, any instance of SliceTree can create a thread safe instance of itself, by calling the s.ToTs() method.  If you create a thread safe instance, you should stop using the old instance.
+
+Example conversion from map to a thread safe OrderedMap instance:
+```go
+s:=omap.NewFromMap(myMap,cb).ToTs()
 ```
 
-__Get our last Key:__
-```
-	key, ok = s.LastKey()
-	if ok {
-		fmt.Printf("Last Key: %d\n", key)
-	}
-```
+To check if an instance is thread safe call the s.ThreadSafe() method.
+```go
+var om OrderedMap[string,int]=New(cb)
 
-__Get all keys:__
+if !om.ThreadSafe() {
+	om=om.ToTs()
+}
 ```
-	for i, key := range s.Keys() {
-		fmt.Printf("  ID: %d, Key: %d\n", i, key)
-	}
-```
+Why not always provide a thread safe instance?  A thread safe instance requires mutex locking, this limits what can be done even when operations are atomic.  Example: You may have a perfectly valid reason to call an iterator from within an iterator on the same instance; This cannot be done when a mutex lock is applied to an existing instance.
 
-__Get all values:__
-```
-	for i, value := range s.Values() {
-		fmt.Printf("  ID: %d, String: [%s]\n", i, value)
-	}
-```
+__OrderedMap Methods__
 
-__Get All Keys and values:__
-```
-	for key, value := range s.All() {
-		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
-	}
-```
+The following table provides a general overview of the methods in OrderedMap.
 
-__Get all Keys and Values beteen 3 and 11:__
-```
-	for key, value := range s.BetweenKV(3, 11) {
-		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
-	}
-```
+| Method | Arguments | Teturn types | Description |
+|-|-|-|-|
+| All | | iter.Seq2[K, V]| iterator for all Veys and Values |
+| Keys | | iter.Seq2[int, K] | iterator for all keys |
+| Values | | iter.Seq2[int, K] | iterator for all Values |
+| Exists | key K | bool | true if the key was found |
+| Put | key K, value V | int | Sets the key and value pair, and returns the index id |
+| Get | key K | value V, ok bool | Returned the value for the key if ok is true|
+| Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
+| RemoveAll | | int | Clears all elements and returns how many elements were removed |
+| MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |
+| MassRemoveKV | keys ...K | iter.Seq2[int, K] |Tries to remove all keys provided, returns an iterator with a copy of all key value pairs that were removed |
+| Size | | int | returns the number of key/value pairs in the instance |
+| FirstKey | | key K, ok bool | When ok is true the first key in the instance is returned |
+| LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
+| Between | a,b K, opt ...int| total int | Returns the number of elements between a and b. For options  [See](#between-options) |
 
-__Get all keys and values from the first element, to 11:__
-```
-	// Note, when opt is set to FIRST_KEY, the value field a is ignored
-	// and the FirstKey is used.
-	for key, value := range s.BetweenKV(1000, 11, omap.FIRST_KEY) {
-		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
-	}
-```
-
-__Get all keys and values from 5, to out last element:__
-```
-	// Note, when opt is set to LAST_KEY, the value field b is ignored
-	// and the LastKey is used.
-	for key, value := range s.BetweenKV(10, 0, omap.LAST_KEY) {
-		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
-	}
-```
-
+### Between Options

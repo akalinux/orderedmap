@@ -25,6 +25,9 @@ type SliceTree[K any, V any] struct {
 
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
+	if cb == nil {
+		panic("cb cannot be nil")
+	}
 	return &SliceTree[K, V]{
 		Slices: make([]KvSet[K, V], 0, size),
 		Cmp:    cb,
@@ -36,6 +39,22 @@ func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] 
 // use the NewSliceTree function in stead.
 func New[K any, V any](cb func(a, b K) int) *SliceTree[K, V] {
 	return NewSliceTree[K, V](100, cb)
+}
+
+func NewFromMap[K comparable, V any](m map[K]V, cb func(a, b K) int) *SliceTree[K, V] {
+	s := NewSliceTree[K, V](100, cb)
+	for k, v := range m {
+		s.Put(k, v)
+	}
+	return s
+}
+
+func NewFromMapTs[K comparable, V any](m map[K]V, cb func(a, b K) int) OrderedMap[K, V] {
+	s := NewSliceTree[K, V](len(m), cb)
+	for k, v := range m {
+		s.Put(k, v)
+	}
+	return s.ToTs()
 }
 
 func getMid(size int) int {
@@ -157,7 +176,7 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 		ns := size + 1
 		s.grow(ns)
 		kv := KvSet[K, V]{k, v}
-		s.Slices = append(s.Slices, kv)
+		s.Slices = s.Slices[:ns]
 		switch idx {
 		case 0:
 			if offset == 1 {
@@ -283,13 +302,12 @@ func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
 func (s *SliceTree[K, V]) Keys() iter.Seq2[int, K] {
-	pos := 0
 	return func(yield func(int, K) bool) {
-		for pos < len(s.Slices) {
+		size := len(s.Slices)
+		for pos := 0; pos < size; pos++ {
 			if !yield(pos, s.Slices[pos].Key) {
 				return
 			}
-			pos++
 		}
 	}
 }
@@ -299,13 +317,12 @@ func (s *SliceTree[K, V]) Keys() iter.Seq2[int, K] {
 // and not run into deadlocks.
 func (s *SliceTree[K, V]) Values() iter.Seq2[int, V] {
 
-	pos := 0
 	return func(yield func(int, V) bool) {
-		for pos < len(s.Slices) {
+		size := len(s.Slices)
+		for pos := 0; pos < size; pos++ {
 			if !yield(pos, s.Slices[pos].Value) {
 				return
 			}
-			pos++
 		}
 	}
 }
@@ -315,13 +332,12 @@ func (s *SliceTree[K, V]) Values() iter.Seq2[int, V] {
 // and not run into deadlocks.
 func (s *SliceTree[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		pos := 0
-		for pos < len(s.Slices) {
+		size := len(s.Slices)
+		for pos := 0; pos < size; pos++ {
 			kv := s.Slices[pos]
 			if !yield(kv.Key, kv.Value) {
 				return
 			}
-			pos++
 		}
 	}
 }
@@ -580,8 +596,8 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K, opt ...int) (begin, end, total i
 }
 
 // Between implements [OrderedMap]
-func (s *SliceTree[K, V]) Between(a, b K, opt ...int) (total int, ok bool) {
-	_, _, total, ok = s.betweenChecks(a, b, opt...)
+func (s *SliceTree[K, V]) Between(a, b K, opt ...int) (total int) {
+	_, _, total, _ = s.betweenChecks(a, b, opt...)
 	return
 }
 
@@ -597,11 +613,10 @@ func (s *SliceTree[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 }
 
 // RemoveBetween implements [OrderedMap]
-func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
+func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
 		if res {
 			total = 1 + y - x
-			ok = res
 		}
 	}, opt...)
 	return
@@ -639,10 +654,22 @@ func (s *SliceTree[K, V]) SetOverwrite(cb func(key K, oldValue, newValue V)) {
 	s.OnOverWrite = cb
 }
 
+// SetGrowth implements [OrderedMap]
 func (s *SliceTree[K, V]) SetGrowth(grow int) {
 	if grow <= 0 {
 		s.Growth = 1
 		return
 	}
 	s.Growth = grow
+}
+
+// Utility method, to convert from an OrderedMap instance to a regular map.
+// Due to constraints placed on maps in go, this feature is implemented as a function, not a method.
+func ToMap[K comparable, V any](src OrderedMap[K, V]) map[K]V {
+
+	m := make(map[K]V, src.Size())
+	for k, v := range src.All() {
+		m[k] = v
+	}
+	return m
 }

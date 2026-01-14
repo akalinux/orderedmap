@@ -20,6 +20,11 @@ func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMap[K, V]) {
 	return
 }
 
+// Always returns this instance.
+func (s *ThreadSafeOrderedMap[K, V]) ToTs() OrderedMap[K, V] {
+	return s
+}
+
 // All implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
@@ -174,10 +179,10 @@ func (s *ThreadSafeOrderedMap[K, V]) LastKey() (key K, ok bool) {
 }
 
 // Between implements [OrderedMap]
-func (s *ThreadSafeOrderedMap[K, V]) Between(a, b K, opt ...int) (total int, ok bool) {
+func (s *ThreadSafeOrderedMap[K, V]) Between(a, b K, opt ...int) (total int) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	total, ok = s.Tree.Between(a, b, opt...)
+	total = s.Tree.Between(a, b, opt...)
 	return
 }
 
@@ -220,7 +225,7 @@ func (s *ThreadSafeOrderedMap[K, V]) RemoveBetweenKV(a, b K, opt ...int) (seq it
 }
 
 // RemoveBetween implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total int, ok bool) {
+func (s *ThreadSafeOrderedMap[K, V]) RemoveBetween(a, b K, opt ...int) (total int) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	return s.Tree.RemoveBetween(a, b, opt...)

@@ -6,13 +6,15 @@
 // The internals manage keys by splicing the internal slice, without the use of a temporary slice.
 // The side effect of this design results in what operates exactly like an ordered map.
 //
+// Unlike a map in go, keys are not constrained to a comparable type. In stead a compare funciton
+// must be passed to the constructor.
+//
 // Performance objectives:
 //   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
 //   - All iteration operations are fixed cost of o(n).
 //   - Finding or removing elements between 2 elements is always a fixed cost of o(log(n) + log(n)).
 //   - Finding elements before or after a given point is always a fixed cost of o(log n)
 //   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
-//   - Key/Value pairs are kept in a struct container, the underlying slice only holds a pointer to the struct, so all splice operations operate on pointer manipulation.
 //   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 //
 // The omap package provides a common interface [OrderedMap] implemented by the following:
