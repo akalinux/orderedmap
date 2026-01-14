@@ -9,7 +9,7 @@ import (
 type SliceTree[K any, V any] struct {
 
 	// Internally managed keys slice
-	Slices []*KvSet[K, V]
+	Slices []KvSet[K, V]
 
 	// Compare function.
 	Cmp func(a, b K) int
@@ -26,7 +26,7 @@ type SliceTree[K any, V any] struct {
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
 	return &SliceTree[K, V]{
-		Slices: make([]*KvSet[K, V], 0, size),
+		Slices: make([]KvSet[K, V], 0, size),
 		Cmp:    cb,
 		Growth: 100,
 	}
@@ -64,7 +64,7 @@ func (s *SliceTree[K, V]) Put(k K, v V) (index int) {
 
 	if total == 0 {
 		// 0 size.. just append
-		s.Slices = append(s.Slices, &KvSet[K, V]{k, v})
+		s.Slices = append(s.Slices, KvSet[K, V]{k, v})
 		return 0
 	}
 	idx, offset := s.GetIndex(k)
@@ -79,7 +79,7 @@ func (s *SliceTree[K, V]) Set(index int, v V) (status bool) {
 		return
 
 	}
-	el := s.Slices[index]
+	el := &s.Slices[index]
 	if s.OnOverWrite != nil {
 		s.OnOverWrite(el.Key, el.Value, v)
 	}
@@ -156,7 +156,7 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 	if offset != 0 {
 		ns := size + 1
 		s.grow(ns)
-		kv := &KvSet[K, V]{k, v}
+		kv := KvSet[K, V]{k, v}
 		s.Slices = append(s.Slices, kv)
 		switch idx {
 		case 0:
@@ -187,7 +187,7 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 			// empty slice!
 			s.grow(ns)
 			s.Slices = s.Slices[:ns]
-			s.Slices[idx] = &KvSet[K, V]{k, v}
+			s.Slices[idx] = KvSet[K, V]{k, v}
 		} else {
 			// overwrite
 			if s.OnOverWrite != nil {
@@ -384,7 +384,7 @@ func (s *SliceTree[K, V]) massremove(args []K, cb func(a, b int)) int {
 
 func (s *SliceTree[K, V]) MassRemoveKV(args ...K) iter.Seq2[K, V] {
 	// worst case is the len of args.. so we always pre-allocate for worst case
-	list := make([][]*KvSet[K, V], 0, len(args))
+	list := make([][]KvSet[K, V], 0, len(args))
 	s.massremove(args, func(a, b int) {
 		list = append(list, slices.Clone(s.Slices[a:b+1]))
 		s.rangedel(a, b)
@@ -430,7 +430,7 @@ func (s *SliceTree[K, V]) unsafeIter(keys []K) iter.Seq2[int, int] {
 	}
 }
 
-func KvIter[K any, V any](set []*KvSet[K, V]) iter.Seq2[K, V] {
+func KvIter[K any, V any](set []KvSet[K, V]) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		for _, row := range set {
 			if !yield(row.Key, row.Value) {
@@ -633,7 +633,7 @@ func (s *SliceTree[K, V]) RemoveBetweenKV(a, b K, opt ...int) (removed iter.Seq2
 			set := slices.Clone(s.Slices[x:o])
 			removed = KvIter(set)
 		} else {
-			removed = KvIter([]*KvSet[K, V]{})
+			removed = KvIter([]KvSet[K, V]{})
 		}
 	}, opt...)
 	return

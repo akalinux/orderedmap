@@ -38,7 +38,7 @@ func TestGetIndex(t *testing.T) {
 	s := &SliceTree[int, int]{
 		Cmp: cmp.Compare[int],
 		//           0  1  2  3  4   5   6
-		Slices: []*KvSet[int, int]{
+		Slices: []KvSet[int, int]{
 			{2, 0},
 			{4, 0},
 			{6, 0},
@@ -73,7 +73,7 @@ func TestGetIndex(t *testing.T) {
 	s = &SliceTree[int, int]{
 		Cmp: cmp.Compare[int],
 		//           0  1  2  3  4   5   6
-		Slices: []*KvSet[int, int]{
+		Slices: []KvSet[int, int]{
 			{0, 0},
 			{1, 0},
 		},
@@ -81,12 +81,12 @@ func TestGetIndex(t *testing.T) {
 	index, offset = s.GetIndex(2)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 
-	s.Slices = []*KvSet[int, int]{{0, 0}}
+	s.Slices = []KvSet[int, int]{{0, 0}}
 	t.Logf("Root: %v, size: %d", s.Slices[0], len(s.Slices))
 	// note this was fatal in one variation of the code
 	index, offset = s.GetIndex(1)
 
-	s.Slices = []*KvSet[int, int]{
+	s.Slices = []KvSet[int, int]{
 		{0, 0},
 		{1, 0},
 		{2, 0},
@@ -124,7 +124,7 @@ func TestIdxSet(t *testing.T) {
 	s.SetIndex(2, 1, 3, 0)
 	checkExpected(t, "Set 4", expected, s.Slices)
 	// found a bug freom this test set
-	s.Slices = []*KvSet[int, int]{
+	s.Slices = []KvSet[int, int]{
 		{0, 0},
 		{1, 0},
 		{2, 0},
@@ -135,7 +135,7 @@ func TestIdxSet(t *testing.T) {
 
 }
 
-func checkExpected(t *testing.T, set string, exp []int, got []*KvSet[int, int]) {
+func checkExpected(t *testing.T, set string, exp []int, got []KvSet[int, int]) {
 	t.Logf("** Starting set: %s", set)
 	if len(got) != len(exp) {
 		t.Fatalf("Expected: length of: %d, got length of %d", len(exp), len(got))
@@ -151,7 +151,7 @@ func checkExpected(t *testing.T, set string, exp []int, got []*KvSet[int, int]) 
 func TestRemoveIndex(t *testing.T) {
 	s := &SliceTree[int, int]{
 		Cmp: cmp.Compare[int],
-		Slices: []*KvSet[int, int]{
+		Slices: []KvSet[int, int]{
 			{-1, 0},
 			{0, 0},
 			{1, 0},
@@ -173,32 +173,32 @@ func TestRemoveIndex(t *testing.T) {
 		t.Fatalf("Should not be able to clear an offset position")
 	}
 
-	fullCheck(t, "Delete first element", []*KvSet[int, int]{
+	fullCheck(t, "Delete first element", []KvSet[int, int]{
 		{0, 0},
 		{1, 0},
 		{2, 0},
 		{3, 0},
 		{4, 0},
 	}, s.Slices, true, s.clearIdx(0, 0))
-	fullCheck(t, "Delete last element", []*KvSet[int, int]{
+	fullCheck(t, "Delete last element", []KvSet[int, int]{
 		{0, 0},
 		{1, 0},
 		{2, 0},
 		{3, 0},
 	}, s.Slices, true, s.clearIdx(4, 0))
 
-	fullCheck(t, "Delete 2nd element", []*KvSet[int, int]{
+	fullCheck(t, "Delete 2nd element", []KvSet[int, int]{
 		{0, 0},
 		{2, 0},
 		{3, 0},
 	}, s.Slices, true, s.clearIdx(1, 0))
 
-	fullCheck(t, "Remove all", []*KvSet[int, int]{}, s.Slices, true, 3 == s.RemoveAll())
+	fullCheck(t, "Remove all", []KvSet[int, int]{}, s.Slices, true, 3 == s.RemoveAll())
 
 	if s.Size() != 0 {
 		t.Fatalf("Failed to actually clear our set!")
 	}
-	s.Slices = []*KvSet[int, int]{{0, 0}}
+	s.Slices = []KvSet[int, int]{{0, 0}}
 	s.clearIdx(0, 0)
 	if len(s.Slices) != 0 {
 		t.Fatalf("Slice should now be empty")
@@ -206,7 +206,7 @@ func TestRemoveIndex(t *testing.T) {
 
 }
 
-func fullCheck(t *testing.T, test string, got, exp []*KvSet[int, int], state, res bool) {
+func fullCheck(t *testing.T, test string, got, exp []KvSet[int, int], state, res bool) {
 
 	t.Logf("** Testing Set: [%s]", test)
 	if state != res {
@@ -222,7 +222,7 @@ func fullCheck(t *testing.T, test string, got, exp []*KvSet[int, int], state, re
 func TestPut(t *testing.T) {
 	s := New[int, int](cmp.Compare)
 
-	expected := []*KvSet[int, int]{}
+	expected := []KvSet[int, int]{}
 	for i := range 10 {
 		t.Logf("*** Setting idx: %d, key: %d", i, i)
 		showAll(t, s.Slices)
@@ -236,7 +236,7 @@ func TestPut(t *testing.T) {
 			showAll(t, s.Slices)
 			t.Fatalf("Expected index: %d, got: %d", i, idx)
 		}
-		expected = append(expected, &KvSet[int, int]{i, 0})
+		expected = append(expected, KvSet[int, int]{i, 0})
 	}
 	fullCheck(t, "Set 0-9 in sequence", expected, s.Slices, true, true)
 
@@ -271,7 +271,7 @@ func TestPut(t *testing.T) {
 		t.Logf("Will add: %d at: %d, offset %d", key, index, offset)
 		s.Put(key, 0)
 	}
-	expected = []*KvSet[int, int]{
+	expected = []KvSet[int, int]{
 		{0, 0},
 		{1, 0},
 		{2, 0},
@@ -288,7 +288,7 @@ func TestPut(t *testing.T) {
 
 }
 
-func showAll(t *testing.T, list []*KvSet[int, int]) {
+func showAll(t *testing.T, list []KvSet[int, int]) {
 	for id, v := range list {
 		t.Logf("   Idx: %d, Value: %v", id, v)
 	}
@@ -418,11 +418,11 @@ func TestContig(t *testing.T) {
 	}
 
 	contigCheck(t, "Set 1", expected, f)
-	f.Slices = []*KvSet[int, any]{{0, nil}}
+	f.Slices = []KvSet[int, any]{{0, nil}}
 	contigCheck(t, "Set 2", [][]int{{0, 0}}, f)
-	f.Slices = []*KvSet[int, any]{{1, nil}, {0, nil}}
+	f.Slices = []KvSet[int, any]{{1, nil}, {0, nil}}
 	contigCheck(t, "Set 3", [][]int{{0, 1}}, f)
-	f.Slices = []*KvSet[int, any]{
+	f.Slices = []KvSet[int, any]{
 		{13, 0}, {12, 0},
 		{1, nil}, {0, nil},
 	}
