@@ -186,10 +186,14 @@ So what do these numbers really tell us?  Well nothing we didn't all ready know 
 go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
 On write:
-  - Go map map is on average 20%-70% faster than omap.SliceTree.
+  - Go map map is on average 45%-70% faster than omap.SliceTree.
 
 On read:
   - Go map on average is about 27%-55% faster Than omap.SliceTree
 
 Where the native map in go always perfoms worse is in memory usage:
-  - Go map uses about 20%-70% more memory than omap.SliceTree.
+  - Go map uses about 45%-70% more memory than omap.SliceTree.
+
+So is there an oreder of magnitued in the performance difference? No.. but a map in go is faster for general put/get operations.
+In truth the average difference in memory cost is about the same difference in read and write speed.  The omap package is not
+a replacement for maps in go, omap is a solution to a very niche set of problems for go.
