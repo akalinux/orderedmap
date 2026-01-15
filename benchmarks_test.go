@@ -8,11 +8,12 @@ import (
 
 const BENCHMARK_STRING_SIZE = 1024
 const BENCHMARK_STRINGS = 100
-const BENCHMARK_PASS = 4
+const BENCHMARK_START = 7
+const BENCHMARK_END = 10
 
 func BenchmarkNew(b *testing.B) {
 
-	for tx := 1; tx <= BENCHMARK_PASS; tx++ {
+	for tx := BENCHMARK_START; tx <= BENCHMARK_END; tx++ {
 		ss := tx * BENCHMARK_STRING_SIZE
 		bs := tx * tx * BENCHMARK_STRINGS
 		keys := make([]*string, 0, bs)
@@ -22,14 +23,14 @@ func BenchmarkNew(b *testing.B) {
 			v := fmt.Sprintf(f, i)
 			keys = append(keys, &v)
 		}
-		var m map[string]KvSet[*string, any]
+		var m map[string]*KvSet[*string, any]
 		b.Run(
 			fmt.Sprintf("Native map, size: [%d], keys: [%d]", size, bs),
 			func(b *testing.B) {
 				for range b.N {
-					m = make(map[string]KvSet[*string, any], bs)
+					m = make(map[string]*KvSet[*string, any], bs)
 					for i := range bs {
-						m[(*keys[i])[len(*keys[i])-size:]] = KvSet[*string, any]{keys[i], nil}
+						m[(*keys[i])[len(*keys[i])-size:]] = &KvSet[*string, any]{keys[i], nil}
 					}
 				}
 
