@@ -9,7 +9,7 @@ The side effect of this design results in what operates exactly like ordered map
 
 Performance objectives:
   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
-  - All iteration operations are fixed cost of o(n).
+  - All iteration operations are fixed cost of o(1).
   - Finding or removing elements between 2 points is always a fixed cost of o(log(n) + log(n)).
   - Finding elements before or after a given point is always a fixed cost of o(log n)
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
@@ -17,7 +17,7 @@ Performance objectives:
 
 ## When Should you use omap?
 
-Any one of these is a rractical use case:
+Any one of these is a Practical use case:
   - An ordered map is required
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
@@ -116,17 +116,17 @@ The following table provides a general overview of the methods in OrderedMap.
 
 | Method | Arguments | Teturn types | Description |
 |-|-|-|-|
-| All | | iter.Seq2[K, V]| iterator for all Veys and Values |
+| All | | iter.Seq2[K, V]| iterator for all Keys and Values |
 | Keys | | iter.Seq[K] | iterator for all keys |
 | Values | | iter.Seq[V] | iterator for all Values |
 | Exists | key K | bool | true if the key was found |
 | Contains | key K | bool | true if the key is between both the FirstKey and LastKey |
-| Put | key K, value V | int | Sets the key and value pair, and returns the index id |
+| Put | key K, value V | int | Sets the key and value pair |
 | Get | key K | value V, ok bool | Returned the value for the key if ok is true|
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
 | RemoveAll | | int | Clears all elements and returns how many elements were removed |
 | MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |
-| MassRemoveKV | keys ...K | iter.Seq2[int, K] |Tries to remove all keys provided, returns an iterator with a copy of all key value pairs that were removed |
+| MassRemoveKV | keys ...K | iter.Seq2[int, K] |Tries to remove all keys provided. The iterator with a copy of all key value pairs that were removed |
 | Size | | int | returns the number of key/value pairs in the instance |
 | FirstKey | | key K, ok bool | When ok is true the first key in the instance is returned |
 | LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
@@ -138,7 +138,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | Merge | set OrderedMap[K, V] |int | Merges set into this instance |
 | SetOverwrite | cb func(key K, oldValue, newValue V) | | Sets the callback method that fires before a value is overwritten |
 | SetGrowth | grow int| | Sets the internal growth value for the slice |
-| ToTs() | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper |
+| ToTs() | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper, other wise returns this instance |
 ### Between Options
 
 The following table exlains the usage and possible values for functions that support between operations.
@@ -159,8 +159,8 @@ Returns all values up to "Tomorrow".
 
 ## Benchmarks
 
-So benchmarks are always very subjective.  But the real question is: what do we compare omap too?  The only real answer is the native map in go.
-Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the go native function to be an order of magnitude.
+So benchmarks are always very subjective, but the real question is: what do we compare omap too?  The only real answer is the native map in go.
+Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to be an order of magnitude faster.
 
 __How well does omap compare native map feature in go?:__
 ```
@@ -186,8 +186,9 @@ So what do these numbers really tell us?  Well nothing we didn't all ready know 
 go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
 On write:
-  - Go map is any where from 2-4 times faster on write than omap.SliceTree
-  - Go map uses about 2-4 times more memory  than omap.SliceTree
+  - Go map is any where from 2-4 times faster than omap.SliceTree.
+  - Go map uses about 2-4 times more memory than omap.SliceTree.
 
 On read:
   - Go map on average is about 27%-55% faster Than omap.SliceTree
+
