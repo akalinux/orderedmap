@@ -186,7 +186,7 @@ So what do these numbers really tell us?  Well nothing we didn't all ready know 
 go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
 On write:
-  - Go map map is on average 2-4 times faster than omap.SliceTree.
+  - Go map map is on average 20%-60% faster than omap.SliceTree.
 
 On read:
   - Go map on average is about 27%-55% faster Than omap.SliceTree
