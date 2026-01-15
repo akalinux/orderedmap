@@ -17,7 +17,7 @@ Performance objectives while maintinaing a sorted map:
 
 ## When Should you use omap?
 
-Any one of these is a Practical use case:
+Any one of these is a practical use case:
   - An ordered map is required
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
@@ -194,6 +194,6 @@ On read:
 Where the native map in go always perfoms worse is in memory usage:
   - Go map uses about 45%-70% more memory than omap.SliceTree.
 
-So is there an oreder of magnitued in the performance difference? No.. but a map in go is faster for general put/get operations.
+So is there an order of magnitued in the performance difference? No.. but a map in go is faster for general put/get operations.
 In truth the average difference in memory cost is about the same difference in read and write speed.  The omap package is not
 a replacement for maps in go, omap is a solution to a very niche set of problems for go.
