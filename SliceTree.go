@@ -25,9 +25,6 @@ type SliceTree[K any, V any] struct {
 
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
-	if cb == nil {
-		panic("cb cannot be nil")
-	}
 	return &SliceTree[K, V]{
 		Slices: make([]KvSet[K, V], 0, size),
 		Cmp:    cb,
@@ -47,14 +44,6 @@ func NewFromMap[K comparable, V any](m map[K]V, cb func(a, b K) int) *SliceTree[
 		s.Put(k, v)
 	}
 	return s
-}
-
-func NewFromMapTs[K comparable, V any](m map[K]V, cb func(a, b K) int) OrderedMap[K, V] {
-	s := NewSliceTree[K, V](len(m), cb)
-	for k, v := range m {
-		s.Put(k, v)
-	}
-	return s.ToTs()
 }
 
 func getMid(size int) int {

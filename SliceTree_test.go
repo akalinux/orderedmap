@@ -465,7 +465,9 @@ func TestMassRemove(t *testing.T) {
 	for k, v := range res {
 		crc += k + v + 1
 		t.Logf("Removed Key: %d, value %d", k, v)
-
+	}
+	for range res {
+		break
 	}
 	if crc != 3 {
 		t.Fatalf("Failed to remove our keys, Expected 3, got: %d", crc)
@@ -820,4 +822,35 @@ func TestOperationalSetters(t *testing.T) {
 		t.Fatalf("Callback did not run!")
 	}
 
+}
+
+func TestContains(t *testing.T) {
+
+	s := New[int, int](cmp.Compare).ToTs()
+
+	if s.Contains(1) {
+		t.Fatalf("Should not say whe contain anything when our set is empty!")
+	}
+	for i := range 3 {
+		s.Put(i, i+3)
+	}
+	if !s.Contains(1) {
+		t.Fatalf("our set should contian 1")
+	}
+	if s.Contains(-1) {
+		t.Fatalf("our set should not contian -1")
+	}
+	if s.Contains(3) {
+		t.Fatalf("our set should not contian 3")
+	}
+}
+
+func TestNew(t *testing.T) {
+	m := map[string]int{"a": 1}
+	s := NewFromMap(m, cmp.Compare)
+	if s.Size() != 1 {
+		t.Fail()
+	}
+	s.ToTs().ToTs()
+	ToMap(s)
 }

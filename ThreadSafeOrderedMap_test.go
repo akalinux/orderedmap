@@ -22,15 +22,19 @@ func seqToSeq2(s iter.Seq[int]) func() iter.Seq2[int, int] {
 }
 
 func TestLockIters(t *testing.T) {
-	s := NewTs[int, int](cmp.Compare)
+	s := New[int, int](cmp.Compare)
 	for i := range 3 {
 		s.Put(i, i)
 	}
 
+	for range s.keys() {
+		break
+	}
+
 	for _, f := range []*KvSet[string, func() iter.Seq2[int, int]]{
-		{"All", s.All},
-		{"Keys", seqToSeq2(s.Keys())},
-		{"Values", seqToSeq2(s.Values())},
+		{"All", s.ToTs().All},
+		{"Keys", seqToSeq2(s.ToTs().Keys())},
+		{"Values", seqToSeq2(s.ToTs().Values())},
 	} {
 		count := 0
 		t.Logf("Testing loop iterator from: %s", f.Key)
