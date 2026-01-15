@@ -7,7 +7,7 @@ The btree implementation is ordered and does not allow for duplicates;
 The internals manage keys by splicing the internal slice, without the use of a temporary slice.
 The side effect of this design results in what operates exactly like ordered map.
 
-Performance objectives:
+Performance objectives while maintinaing a sorted map:
   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
   - All iteration operations are fixed cost of o(1).
   - Finding or removing elements between 2 points is always a fixed cost of o(log(n) + log(n)).
@@ -186,9 +186,10 @@ So what do these numbers really tell us?  Well nothing we didn't all ready know 
 go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
 On write:
-  - Go map is any where from 2-4 times faster than omap.SliceTree.
-  - Go map uses about 2-4 times more memory than omap.SliceTree.
+  - Go map map is on average 2-4 times faster than omap.SliceTree.
 
 On read:
   - Go map on average is about 27%-55% faster Than omap.SliceTree
 
+Where the native map in go always perfoms worse is in memory usage:
+  - Go map uses about 2-4 times more memory than omap.SliceTree.
