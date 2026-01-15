@@ -6,6 +6,21 @@ import (
 	"testing"
 )
 
+func seqToSeq2(s iter.Seq[int]) func() iter.Seq2[int, int] {
+	return func() iter.Seq2[int, int] {
+		return func(yield func(int, int) bool) {
+			count := -1
+			for k := range s {
+				count++
+				if !yield(count, k) {
+					return
+				}
+			}
+
+		}
+	}
+}
+
 func TestLockIters(t *testing.T) {
 	s := NewTs[int, int](cmp.Compare)
 	for i := range 3 {
@@ -14,8 +29,8 @@ func TestLockIters(t *testing.T) {
 
 	for _, f := range []*KvSet[string, func() iter.Seq2[int, int]]{
 		{"All", s.All},
-		{"Keys", s.Keys},
-		{"Values", s.Values},
+		{"Keys", seqToSeq2(s.Keys())},
+		{"Values", seqToSeq2(s.Values())},
 	} {
 		count := 0
 		t.Logf("Testing loop iterator from: %s", f.Key)

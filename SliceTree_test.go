@@ -45,26 +45,26 @@ func TestGetIndex(t *testing.T) {
 			{14, 0},
 		},
 	}
-	index, offset := s.GetIndex(12)
+	index, offset := GetIndex(12, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 	if s.Slices[index+offset].Key != 12 {
 		t.Fatalf("Failed to fetchg our indexed value, expected: 12, got %d", s.Slices[index+offset].Key)
 	}
-	index, offset = s.GetIndex(2)
+	index, offset = GetIndex(2, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 	if s.Slices[index+offset].Key != 2 {
 		t.Fatalf("Failed to fetchg our indexed value")
 	}
 
-	index, offset = s.GetIndex(14)
+	index, offset = GetIndex(14, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 	if s.Slices[index+offset].Key != 14 {
 		t.Fatalf("Failed to fetchg our indexed value")
 	}
 
-	index, offset = s.GetIndex(15)
+	index, offset = GetIndex(15, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
-	index, offset = s.GetIndex(1)
+	index, offset = GetIndex(1, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 
 	s = &SliceTree[int, int]{
@@ -75,13 +75,13 @@ func TestGetIndex(t *testing.T) {
 			{1, 0},
 		},
 	}
-	index, offset = s.GetIndex(2)
+	index, offset = GetIndex(2, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
 
 	s.Slices = []KvSet[int, int]{{0, 0}}
 	t.Logf("Root: %v, size: %d", s.Slices[0], len(s.Slices))
 	// note this was fatal in one variation of the code
-	index, offset = s.GetIndex(1)
+	index, offset = GetIndex(1, s.Cmp, s.Slices)
 
 	s.Slices = []KvSet[int, int]{
 		{0, 0},
@@ -89,7 +89,7 @@ func TestGetIndex(t *testing.T) {
 		{2, 0},
 		{3, 0},
 	}
-	index, offset = s.GetIndex(4)
+	index, offset = GetIndex(4, s.Cmp, s.Slices)
 	t.Logf("Index: %d, Offset: %d", index, offset)
 	if index+offset != 4 {
 		t.Fatalf("Expected: 4, got: %d", index+offset)
@@ -226,13 +226,10 @@ func TestPut(t *testing.T) {
 		if len(s.Slices) != i {
 			t.Fatalf("Expected len: %d, got: %d", i, len(s.Slices))
 		}
-		index, offset := s.GetIndex(i)
+		index, offset := GetIndex(i, s.Cmp, s.Slices)
 		t.Logf("Will add: %d at: %d, offset %d", i, index, offset)
-		idx := s.Put(i, 0)
-		if idx != i {
-			showAll(t, s.Slices)
-			t.Fatalf("Expected index: %d, got: %d", i, idx)
-		}
+		s.Put(i, 0)
+
 		expected = append(expected, KvSet[int, int]{i, 0})
 	}
 	fullCheck(t, "Set 0-9 in sequence", expected, s.Slices, true, true)
@@ -242,7 +239,7 @@ func TestPut(t *testing.T) {
 		t.Logf("*** Setting idx: key: %d", key)
 		showAll(t, s.Slices)
 		t.Logf("Trying to index: %d", key)
-		index, offset := s.GetIndex(key)
+		index, offset := GetIndex(key, s.Cmp, s.Slices)
 		t.Logf("Will add: %d at: %d, offset %d", key, index, offset)
 		s.Put(key, 0)
 	}
@@ -253,7 +250,7 @@ func TestPut(t *testing.T) {
 		t.Logf("*** Setting idx: key: %d", key)
 		showAll(t, s.Slices)
 		t.Logf("Trying to index: %d", key)
-		index, offset := s.GetIndex(key)
+		index, offset := GetIndex(key, s.Cmp, s.Slices)
 		t.Logf("Will add: %d at: %d, offset %d", key, index, offset)
 		s.Put(key, 0)
 	}
@@ -264,7 +261,7 @@ func TestPut(t *testing.T) {
 		t.Logf("*** Setting idx: key: %d", key)
 		showAll(t, s.Slices)
 		t.Logf("Trying to index: %d", key)
-		index, offset := s.GetIndex(key)
+		index, offset := GetIndex(key, s.Cmp, s.Slices)
 		t.Logf("Will add: %d at: %d, offset %d", key, index, offset)
 		s.Put(key, 0)
 	}
@@ -310,8 +307,8 @@ func TestGet(t *testing.T) {
 	if ok {
 		t.Fatalf("Invalid value")
 	}
-	v := s.Put(1, 2)
-	v, ok = s.Get(11)
+	s.Put(1, 2)
+	v, ok := s.Get(11)
 	if ok || v != 0 {
 		t.Fatalf("Invalid value")
 	}
@@ -331,7 +328,9 @@ func TestIters(t *testing.T) {
 	for i := range 3 {
 		s.Put(i, i+3)
 	}
-	for i, k := range s.Keys() {
+	i := -1
+	for k := range s.Keys() {
+		i++
 		if k != i {
 			t.Fatalf("Failed Keys Test on Element: %d, expected: %d, got %d", i, i, k)
 		}
@@ -343,7 +342,9 @@ func TestIters(t *testing.T) {
 			t.Fatalf("Failed fetching value from key on Element: %d, expected: %d, got: %d", i, i+3, v)
 		}
 	}
-	for i, v := range s.Values() {
+	i = -1
+	for v := range s.Values() {
+		i++
 		if i+3 != v {
 			t.Fatalf("Bad Value id: %d, expected: %d, got: %d", i, i+3, v)
 		}
@@ -400,7 +401,7 @@ func TestContig(t *testing.T) {
 	f := New[int, any](reverse)
 	//                      1  2  3  4  5   6   7
 	for _, k := range []int{0, 3, 7, 8, 9, 10, 13} {
-		i, o := s.GetIndex(k)
+		i, o := GetIndex(k, s.Cmp, s.Slices)
 		if o != 0 {
 			continue
 		}
@@ -504,7 +505,7 @@ func contigCheck(t *testing.T, name string, exp [][]int, f *SliceTree[int, any])
 	t.Logf("Validating test: [%s]", name)
 	got := make([][]int, len(exp))
 	i := 0
-	f.contig(f.Size(), f.Keys(), func(a, b int) {
+	f.contig(f.Size(), f.keys(), func(a, b int) {
 		t.Logf("a: %d, b, %d", a, b)
 		got[i] = append(got[i], a, b)
 		i++

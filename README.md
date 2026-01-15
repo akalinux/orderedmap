@@ -15,11 +15,20 @@ Performance objectives:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
-The omap package provides a common interface [OrderedMap](OrderedMap.go) implemented by the following:
-   - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go)
-   - Not thread safe [SliceTree](./SliceTree.go)
+## When Should you use omap?
+
+Any one of these is a rractical use case:
+  - An ordered map is required
+  - Fuzzy logic is required, IE the ability to find points in between keys
+  - When a combination of freequent updates and searching by ranges is requried
+  - Memory is more important than cpu time
 
 ## Basic usage
+
+The omap package provides a common interface [OrderedMap](OrderedMap.go) implemented by the following:
+   - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go)
+   - Not thread safe [SliceTree](./SliceTree.go), but can be converted to a thread safe instance.
+
 
 Creating ThreadSafe instance Example:
 
@@ -54,11 +63,11 @@ The resulting output will now be:
 
 	"Hello \n"
 
-### Why this works?
+__Why this works?__
   - The string "Sell" comes before the string "World" 
   - The string "Universe" comes after the string "World"
 
-### How this works
+__How this works__
 
 The index lookup creates 2 values for each potential key:
   - Array postion, example: 0
@@ -108,9 +117,10 @@ The following table provides a general overview of the methods in OrderedMap.
 | Method | Arguments | Teturn types | Description |
 |-|-|-|-|
 | All | | iter.Seq2[K, V]| iterator for all Veys and Values |
-| Keys | | iter.Seq2[int, K] | iterator for all keys |
-| Values | | iter.Seq2[int, K] | iterator for all Values |
+| Keys | | iter.Seq[K] | iterator for all keys |
+| Values | | iter.Seq[V] | iterator for all Values |
 | Exists | key K | bool | true if the key was found |
+| Contains | key K | bool | true if the key is between both the FirstKey and LastKey |
 | Put | key K, value V | int | Sets the key and value pair, and returns the index id |
 | Get | key K | value V, ok bool | Returned the value for the key if ok is true|
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
@@ -137,7 +147,7 @@ The following table exlains the usage and possible values for functions that sup
 |-|-|-|
 | 0 | omap.FIRST_KEY | When set, the a field is ignored and s.FirstKey is used in its place |
 | 0 | omap.LAST_KEY | When set, the b field is ignored and s.LastKey is used in its place |
-| 0 | omap.FIRST_KEY+omap.LAST_KEY | This causes both a and b to be ignored |
+| 0 | omap.FIRST_KEY\|omap.LAST_KEY | This causes both a and b to be ignored |
 
 Example using s.BetweenKV:
 ```go
@@ -149,34 +159,35 @@ Returns all values up to "Tomorrow".
 
 ## Benchmarks
 
+So benchmarks are always very subjective.  But the real question is: what do we compare omap too?  The only real answer is the native map in go.
+Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the go native function to be an order of magnitude.
+
+__How well does omap compare native map feature in go?:__
 ```
-BenchmarkNew-10                 1000000000               0.1787 ns/op
-BenchmarkNewFromMap-10           2085387               562.5 ns/op
-BenchmarkToMap-10                3864132               313.7 ns/op
-BenchmarkPut-10                 199774635                5.758 ns/op
-BenchmarkGet-10                 258267082                4.707 ns/op
-BenchmarkKeys-10                83097054                13.31 ns/op
-BenchmarkValues-10              85411525                13.36 ns/op
-BenchmarkAll-10                 87818228                13.35 ns/op
-BenchmarkSize-10                1000000000               0.8899 ns/op
-BenchmarkMerge-10                4816341               249.6 ns/op
-BenchmarkBetween-10             86252847                14.29 ns/op
-BenchmarkBetweenKV-10           41012466                28.58 ns/op
-BenchmarkMergeMap-10             4135570               289.5 ns/op
-BenchmarkBetweenFirst-10        100000000               10.84 ns/op
-BenchmarkBetweenLast-10         100000000               10.85 ns/op
-BenchmarkBetweenFirstKV-10      44594184                26.18 ns/op
-BenchmarkBetweenLastKV-10       44527660                26.14 ns/op
-BenchmarkMassRemove-10           2717736               435.2 ns/op
-BenchmarkRemoveAll-10           1000000000               0.7727 ns/op
-BenchmarkMassRemoveKV-10         2466362               490.4 ns/op
-BenchmarkRemoveBetween-10       59023917                20.15 ns/op
-BenchmarkRemoveBetweenKV-10     34702495                34.01 ns/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[100]-10                623304              1788 ns/op            5464 B/op          4 allocs/op
+BenchmarkNew/Slicetree,_size_[4],_count_[100]-10                  298898              3862 ns/op            2736 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[100]-10            755082              1581 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[100]-10             331154              3565 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[400]-10                151936              7871 ns/op           21848 B/op          4 allocs/op
+BenchmarkNew/Slicetree,_size_[4],_count_[400]-10                   57602             20789 ns/op            9776 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[400]-10             89725             13153 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[400]-10              37513             31975 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[900]-10                 53892             22983 ns/op           98432 B/op          6 allocs/op
+BenchmarkNew/Slicetree,_size_[4],_count_[900]-10                   21109             56476 ns/op           21808 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[900]-10             31167             38754 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[900]-10              15006             79956 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[1600]-10                43485             27773 ns/op           98432 B/op          6 allocs/op
+BenchmarkNew/Slicetree,_size_[4],_count_[1600]-10                   9874            117807 ns/op           41008 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[1600]-10            10000            108882 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[1600]-10              7345            147573 ns/op               0 B/op          0 allocs/op
 ```
 
+So what do these numbers really tell us?  Well nothing we didn't all ready know prior to the benchmark. The map feature of
+go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
+On write:
+  - Go map is any where from 2-4 times faster on write than omap.SliceTree
+  - Go map uses about 2-4 times more memory  than omap.SliceTree
 
-
-
-
-
+On read:
+  - Go map on average is about 27%-55% faster Than omap.SliceTree

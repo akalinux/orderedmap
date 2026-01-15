@@ -66,7 +66,7 @@ func getMid(size int) int {
 // Complexity: o(log n)
 func (s *SliceTree[K, V]) Remove(k K) (value V, ok bool) {
 
-	idx, offset := s.GetIndex(k)
+	idx, offset := GetIndex(k, s.Cmp, s.Slices)
 	i := idx + offset
 	if i >= 0 && i < len(s.Slices) {
 		value = s.Slices[i].Value
@@ -78,16 +78,27 @@ func (s *SliceTree[K, V]) Remove(k K) (value V, ok bool) {
 
 // Sets the key/vale pair and returns the index id.
 // Comlexity: o(log n)
-func (s *SliceTree[K, V]) Put(k K, v V) (index int) {
+func (s *SliceTree[K, V]) Put(k K, v V) {
 	total := len(s.Slices)
 
 	if total == 0 {
 		// 0 size.. just append
 		s.Slices = append(s.Slices, KvSet[K, V]{k, v})
-		return 0
 	}
-	idx, offset := s.GetIndex(k)
-	return s.SetIndex(idx, offset, k, v)
+	idx, offset := GetIndex(k, s.Cmp, s.Slices)
+	s.SetIndex(idx, offset, k, v)
+}
+
+func (s *SliceTree[K, V]) Contains(key K) bool {
+	if s.Size() == 0 {
+		return false
+	} else if s.Cmp(s.Slices[0].Key, key) == 1 {
+		return false
+	} else if s.Cmp(s.Slices[len(s.Slices)-1].Key, key) == -1 {
+		return false
+	}
+
+	return true
 }
 
 // Sets the value in the index to v.  The last index value returned from Put to update the last index point.
@@ -113,7 +124,7 @@ func (s *SliceTree[K, V]) Get(k K) (value V, found bool) {
 	if len(s.Slices) == 0 {
 		return
 	}
-	i, o := s.GetIndex(k)
+	i, o := GetIndex(k, s.Cmp, s.Slices)
 	if o == 0 {
 		return s.Slices[i].Value, true
 	}
@@ -130,7 +141,7 @@ func (s *SliceTree[K, V]) Exists(k K) bool {
 	case 1:
 		return s.Cmp(s.Slices[0].Key, k) == 0
 	}
-	_, o := s.GetIndex(k)
+	_, o := GetIndex(k, s.Cmp, s.Slices)
 	return o == 0
 }
 
@@ -240,10 +251,8 @@ func (s *SliceTree[K, V]) grow(size int) {
 //   - offset of -1, expand the slice before the index and put the value to left of the current postion
 //
 // Complexity: o(log n)
-func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
+func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {
 
-	Cmp := s.Cmp
-	Slices := s.Slices
 	end := len(Slices)
 	switch end {
 	case 0:
@@ -301,11 +310,11 @@ func (s *SliceTree[K, V]) GetIndex(k K) (index, offset int) {
 // Returns an iterator for the current keys.
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
-func (s *SliceTree[K, V]) Keys() iter.Seq2[int, K] {
-	return func(yield func(int, K) bool) {
+func (s *SliceTree[K, V]) Keys() iter.Seq[K] {
+	return func(yield func(K) bool) {
 		size := len(s.Slices)
 		for pos := 0; pos < size; pos++ {
-			if !yield(pos, s.Slices[pos].Key) {
+			if !yield(s.Slices[pos].Key) {
 				return
 			}
 		}
@@ -315,12 +324,12 @@ func (s *SliceTree[K, V]) Keys() iter.Seq2[int, K] {
 // Returns an iterator for the current values
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
-func (s *SliceTree[K, V]) Values() iter.Seq2[int, V] {
+func (s *SliceTree[K, V]) Values() iter.Seq[V] {
 
-	return func(yield func(int, V) bool) {
+	return func(yield func(V) bool) {
 		size := len(s.Slices)
 		for pos := 0; pos < size; pos++ {
-			if !yield(pos, s.Slices[pos].Value) {
+			if !yield(s.Slices[pos].Value) {
 				return
 			}
 		}
@@ -369,15 +378,26 @@ func (s *SliceTree[K, V]) massremove(args []K, cb func(a, b int)) int {
 	}
 	f := New[int, any](reverse)
 	for _, k := range args {
-		i, o := s.GetIndex(k)
+		i, o := GetIndex(k, s.Cmp, s.Slices)
 		if o != 0 {
 			continue
 		}
 		f.Put(i, nil)
 	}
 
-	s.contig(f.Size(), f.Keys(), cb)
+	s.contig(f.Size(), f.keys(), cb)
 	return f.Size()
+}
+
+func (s *SliceTree[K, V]) keys() iter.Seq2[int, K] {
+	return func(yield func(int, K) bool) {
+		size := len(s.Slices)
+		for pos := 0; pos < size; pos++ {
+			if !yield(pos, s.Slices[pos].Key) {
+				return
+			}
+		}
+	}
 }
 
 func (s *SliceTree[K, V]) MassRemoveKV(args ...K) iter.Seq2[K, V] {
@@ -418,7 +438,7 @@ func (s *SliceTree[K, V]) unsafeIter(keys []K) iter.Seq2[int, int] {
 	id := 0
 	return func(yield func(int, int) bool) {
 		for pos > -1 {
-			i, _ := s.GetIndex(keys[pos])
+			i, _ := GetIndex(keys[pos], s.Cmp, s.Slices)
 			if !yield(id, i) {
 				return
 			}
@@ -555,18 +575,18 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K, opt ...int) (begin, end, total i
 	var c int
 	var d int
 	if len(opt) == 0 {
-		begin, c = s.GetIndex(a)
-		end, d = s.GetIndex(b)
+		begin, c = GetIndex(a, s.Cmp, s.Slices)
+		end, d = GetIndex(b, s.Cmp, s.Slices)
 	} else {
 		if FIRST_KEY != opt[0]&FIRST_KEY {
-			begin, c = s.GetIndex(a)
+			begin, c = GetIndex(a, s.Cmp, s.Slices)
 		} else {
 			c = -1
 		}
 		if LAST_KEY == opt[0]&LAST_KEY {
 			end = len(s.Slices) - 1
 		} else {
-			end, d = s.GetIndex(b)
+			end, d = GetIndex(b, s.Cmp, s.Slices)
 		}
 	}
 	offset := c

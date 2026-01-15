@@ -7,7 +7,7 @@ import (
 
 type ThreadSafeOrderedMap[K any, V any] struct {
 	// Instance to wrap for locking
-	Tree *SliceTree[K, V]
+	Tree OrderedMap[K, V]
 	lock sync.RWMutex
 }
 
@@ -28,19 +28,16 @@ func (s *ThreadSafeOrderedMap[K, V]) ToTs() OrderedMap[K, V] {
 // All implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
-		pos := 0
 		s.lock.RLock()
 		defer s.lock.RUnlock()
-		for {
-			k, v, ok := s.nextKv(pos)
-			if !ok {
-				return
-			}
+		next, stop := iter.Pull2(s.Tree.All())
+		defer stop()
+		for k, v, ok := next(); ok; k, v, ok = next() {
 			if !yield(k, v) {
 				return
 			}
-			pos++
 		}
+
 	}
 }
 
@@ -57,6 +54,11 @@ func (s *ThreadSafeOrderedMap[K, V]) Exists(key K) bool {
 	defer s.lock.RUnlock()
 	return s.Tree.Exists(key)
 }
+func (s *ThreadSafeOrderedMap[K, V]) Contains(key K) bool {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.Tree.Contains(key)
+}
 
 // Get implements [OrderedMap].
 func (s *ThreadSafeOrderedMap[K, V]) Get(key K) (value V, found bool) {
@@ -65,23 +67,35 @@ func (s *ThreadSafeOrderedMap[K, V]) Get(key K) (value V, found bool) {
 	return s.Tree.Get(key)
 }
 
-// Keys implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) Keys() iter.Seq2[int, K] {
-	return func(yield func(int, K) bool) {
-		pos := 0
-		s.lock.RLock()
-		defer s.lock.RUnlock()
-		for {
-			k, _, ok := s.nextKv(pos)
-			if !ok {
+type rlocker interface {
+	rlock()
+	runlock()
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) rlock() {
+	s.lock.RLock()
+}
+func (s *ThreadSafeOrderedMap[K, V]) runlock() {
+	s.lock.RUnlock()
+}
+
+func invertSeq[K any](s rlocker, cb func() iter.Seq[K]) iter.Seq[K] {
+	return func(yield func(K) bool) {
+		s.rlock()
+		defer s.runlock()
+		next, stop := iter.Pull(cb())
+		defer stop()
+		for k, ok := next(); ok; k, ok = next() {
+			if !yield(k) {
 				return
 			}
-			if !yield(pos, k) {
-				return
-			}
-			pos++
 		}
 	}
+}
+
+// Keys implements [OrderedMap].
+func (s *ThreadSafeOrderedMap[K, V]) Keys() iter.Seq[K] {
+	return invertSeq(s, s.Tree.Keys)
 }
 
 // MassRemove implements [OrderedMap].
@@ -109,10 +123,10 @@ func (s *ThreadSafeOrderedMap[K, V]) Merge(set OrderedMap[K, V]) int {
 }
 
 // Put implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) Put(key K, value V) (index int) {
+func (s *ThreadSafeOrderedMap[K, V]) Put(key K, value V) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	return s.Tree.Put(key, value)
+	s.Tree.Put(key, value)
 }
 
 // Remove implements [OrderedMap].
@@ -130,36 +144,13 @@ func (s *ThreadSafeOrderedMap[K, V]) Size() int {
 }
 
 // Values implements [OrderedMap].
-func (s *ThreadSafeOrderedMap[K, V]) Values() iter.Seq2[int, V] {
-	return func(yield func(int, V) bool) {
-		pos := 0
-		s.lock.RLock()
-		defer s.lock.RUnlock()
-		for {
-			_, v, ok := s.nextKv(pos)
-			if !ok {
-				return
-			}
-			if !yield(pos, v) {
-				return
-			}
-			pos++
-		}
-	}
+func (s *ThreadSafeOrderedMap[K, V]) Values() iter.Seq[V] {
+	return invertSeq(s, s.Tree.Values)
 }
 
 // Always returns true.
 func (s *ThreadSafeOrderedMap[K, V]) ThreadSafe() bool {
 	return true
-}
-
-func (s *ThreadSafeOrderedMap[K, V]) nextKv(pos int) (key K, value V, ok bool) {
-	if s.Tree.Size() > pos && pos > -1 {
-		ok = true
-		key = s.Tree.Slices[pos].Key
-		value = s.Tree.Slices[pos].Value
-	}
-	return
 }
 
 // GetFirstKey implements [OrderedMap]

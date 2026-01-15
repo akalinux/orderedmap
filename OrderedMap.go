@@ -12,16 +12,19 @@ type OrderedMap[K any, V any] interface {
 	All() iter.Seq2[K, V]
 
 	// Returns all keys, the int just expected to be a sequential number
-	Keys() iter.Seq2[int, K]
+	Keys() iter.Seq[K]
 
 	// Returns all the values, the int is expected to be a sequential number
-	Values() iter.Seq2[int, V]
+	Values() iter.Seq[V]
 
 	// Returns true if the key exists, false if it does not.
 	Exists(key K) bool
 
+	// Returns true if the key is between the first and last key
+	Contains(key K) bool
+
 	// Sets the key to the value, returns the index id.
-	Put(key K, value V) (index int)
+	Put(key K, value V)
 
 	// Tries to get the value using the given key.
 	// If the key exists, found is set to true, if the key does not exists then found is set to false.

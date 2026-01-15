@@ -41,14 +41,14 @@ func main() {
 
 	fmt.Printf("\n#All Keys\n")
 	// Get all keys
-	for i, key := range s.Keys() {
-		fmt.Printf("  ID: %d, Key: %d\n", i, key)
+	for key := range s.Keys() {
+		fmt.Printf("  Key: %d\n", key)
 	}
 
 	// Get all values
 	fmt.Printf("\n#All Values\n")
-	for i, value := range s.Values() {
-		fmt.Printf("  ID: %d, String: [%s]\n", i, value)
+	for value := range s.Values() {
+		fmt.Printf("  Value: [%s]\n", value)
 	}
 
 	// All Keys and values
