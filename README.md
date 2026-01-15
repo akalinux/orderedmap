@@ -21,7 +21,7 @@ Any one of these is a rractical use case:
   - An ordered map is required
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
-  - Memory is more important than cpu time
+  - Memory is more important than cpu time for your maps
 
 ## Basic usage
 
