@@ -32,7 +32,7 @@ func BenchmarkNew(b *testing.B) {
 		}
 		var m map[string]*KvSet[*string, any]
 		b.Run(
-			fmt.Sprintf("Native map, keys: [%d]", bs),
+			fmt.Sprintf("Native map Put, keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					m = make(map[string]*KvSet[*string, any], bs)
@@ -68,6 +68,9 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
+		if s.Size() != bs {
+			b.Fatalf("Go map should contain: %d elements, got: %d", bs, len(m))
+		}
 		b.Run(
 			fmt.Sprintf("Native map, Get, keys: [%d]", bs),
 			func(b *testing.B) {

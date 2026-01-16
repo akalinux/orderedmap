@@ -171,28 +171,30 @@ __Disclamier:__ omap.SliceTree is built around a Compare function, this means th
 
 __How well does omap compare native map feature in go?:__
 ```
-BenchmarkNew/Native_map,_Get,_keys:_[1600]-10                              10000            109941 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[1600]-10                                7892            153240 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[1600]-10                       64          17346114 ns/op           22550 B/op       2944 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[1600]-10                 4468            271276 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_keys:_[2500]-10                                   15030             79120 ns/op          169264 B/op       2510 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[2500]-10                                5620            191470 ns/op           65584 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[2500]-10                               5440            203561 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[2500]-10                                4914            231893 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[2500]-10                       27          43038015 ns/op           36988 B/op       4744 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[2500]-10                 2802            425978 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_keys:_[3600]-10                                    9878            121851 ns/op          304880 B/op       3618 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[3600]-10                                3897            306017 ns/op           90160 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[3600]-10                               2971            364166 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[3600]-10                                3434            337542 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[3600]-10                       10         111183773 ns/op           54669 B/op       6944 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[3600]-10                 1945            615011 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_keys:_[4900]-10                                    7821            152657 ns/op          336080 B/op       4918 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[4900]-10                                2479            468161 ns/op          122928 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[4900]-10                                805           1466679 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[4900]-10                                2430            495577 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[4900]-10                        4         253208098 ns/op           75682 B/op       9544 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[4900]-10                 1320            898356 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[1600]-10                               26467             44379 ns/op           93056 B/op       1606 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[1600]-10                                9781            114559 ns/op           41008 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[1600]-10                              10000            109108 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[1600]-10                                7849            150049 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[1600]-10                       67          17179143 ns/op           22552 B/op       2944 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[1600]-10                 4364            267578 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[2500]-10                               15544             77330 ns/op          169264 B/op       2510 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[2500]-10                                5958            186216 ns/op           65584 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[2500]-10                               5620            200192 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[2500]-10                                5156            231305 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[2500]-10                       27          41700145 ns/op           36988 B/op       4744 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[2500]-10                 2847            425970 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[3600]-10                               10038            119693 ns/op          304880 B/op       3618 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[3600]-10                                3668            302038 ns/op           90160 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[3600]-10                               2881            373605 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[3600]-10                                3358            351491 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[3600]-10                        9         114708859 ns/op           54710 B/op       6944 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[3600]-10                 1914            627752 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[4900]-10                                7454            159133 ns/op          336080 B/op       4918 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[4900]-10                                2288            480656 ns/op          122928 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[4900]-10                                764           1435220 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[4900]-10                                2323            499635 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[4900]-10                        4         270712341 ns/op           75738 B/op       9545 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[4900]-10                 1357            881794 ns/op               0 B/op          0 allocs/op
 ```
 
 __How to read the benchmark__
@@ -211,8 +213,8 @@ Where the native map in go always perfoms worse is in memory usage:
   - Go map uses about 45%-70% more memory than omap.SliceTree.
 
 Scanning for any key between 2 strings:
-  - omap.SliceTree is several order of magnitudes faster
-  - omap.SliceTree uses no additional memory
+  - Go map must be iterated over and each key must be compared o(n)
+  - omap.SliceTree is just o(log(n)+log(n))
 
 So which is better for performance?  Depends.. If you need very large sets of keys and you would have to create a proxy key to represent the raw key, then use omap.SliceTree, other wise use map.  
 
@@ -237,3 +239,11 @@ the go native map feature will aways write faster.  The go map implementation wi
 __Why include memory in benchmarks?__
 
 This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other ordered map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most ordered map implementations arn't performacne competative with the native map in go.  The omap.SliceTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree is signifigantly faster than the native map feature of go.  An omap.SliceTree instance does all this while being an ordered map, that is no small feat.
+
+__Comapring go map o(1) and omap.SliceTee o(log(n))__
+
+__Go map: o(1) How so?__  In truth go map is o(1), but it is on(1) on 2 1 byte slices followed by n number of 1 byte slices.
+.  Effectivly go map is a mix of a 2 tier Order First Search, followed by a full scan.  This hits the sweet spot on most use cases.  The side effect is, keys are never
+going to be ordered.
+
+__omap.Slicetree is o(log n)?__ The omap.SliceTree is a tree with inifinite depth, indexed by sequence order. An omap.SliceTree instance is never a full scan, but depth of search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the tree.  This hits the sweet for range based lookups and massive data sets.  The side effect is an ordered index of keys.
