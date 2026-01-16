@@ -242,8 +242,25 @@ This is a complex topic, but here is a short answer: Try turning memory benchmar
 
 __Comapring go map o(1) and omap.SliceTee o(log(n))__
 
-__Go map: o(1) How so?__  In truth go map is o(1), but it is on(1) on 2 1 byte slices followed by n number of 1 byte slices.
-.  Effectivly go map is a mix of a 2 tier Order First Search, followed by a full scan.  This hits the sweet spot on most use cases.  The side effect is, keys are never
-going to be ordered.
+__Go map: o(1) How so?__  In truth go map converts the fist to bytes into 2 uint8, thoes 2 bytes are uses a keys in a tier arrya of arrays, the remaiing bytes then hit the o(1) or full scan.  This hits the sweet spot on most use cases.  The side effect is, keys are never going to be ordered.
 
-__omap.Slicetree is o(log n)?__ The omap.SliceTree is a tree with inifinite depth, indexed by sequence order. An omap.SliceTree instance is never a full scan, but depth of search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the tree.  This hits the sweet for range based lookups and massive data sets.  The side effect is an ordered index of keys.
+__omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with inifinite depth, indexed by sequence order. An omap.SliceTree instance is never a full scan, but depth of search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the tree.  This hits the sweet for range based lookups and massive data sets.  The side effect is an ordered index of keys.
+
+__Odd Quirks of indexing__
+
+So which is fater a 1 byte key using a map in go with 255 elements or omap.SliceTree?
+  - at a one byte key omap.SliceTree is fater
+
+So which is fater a 2 byte key using a map in go with 65535 elements or omap.SliceTree?
+  - at 2 bytes a normal map in go is faster
+
+So when does omap.Slicetree actually become faster? 
+  - when a map in go would end up with colisions on the 3rd tier, this causes a full scan of that tier.
+  - when does that happen?  Usually after a few thousand unique strings, but it depends on which buckets they land.
+
+Is omap.SliceTree ever faster with ints or floats?
+  - Yes on range scans
+  - On Writes, Never
+  - On Reads, never on a 16 bit number, and only after ternary logic is faster on the least signifigant bits after the first 16 bits while operating on the entire integer
+
+  
