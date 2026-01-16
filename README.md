@@ -222,7 +222,7 @@ Scanning all keys for every key is a known worst case.. so why include it?  Peop
 
 __Why does the native go map read slow down so much after 2500 elements?__
 
-Its complicated, but its a combination of memory bandwidth and the internal go map doing full scans due to a large number of collisions.
+Its complicated, but its a combination of memory bandwidth and the internals the go native map doing full scans due to a large number of collisions.
 
 __Why is SliceTree always slower on write?__
 
