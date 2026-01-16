@@ -17,8 +17,8 @@
 //   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 //
 // The omap package provides a common interface [OrderedMap] implemented by the following:
-//   - Thread safe [ThreadSafeOrderedMap]
-//   - Not thread safe [SliceTree]
+//   - Thread safe [ThreadSafeOrderedMap], this is a wrapper for [SliceTree]
+//   - Not thread safe [SliceTree], but can return a thread safe wrapper.
 //
 // Basic Example:
 //

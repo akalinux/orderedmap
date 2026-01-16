@@ -18,14 +18,21 @@ func BenchmarkNew(b *testing.B) {
 		bs := tx * tx * BENCHMARK_STRINGS
 		keys := make([]*string, 0, bs)
 		f := fmt.Sprintf("%% %dd", ss)
+
 		size := len(fmt.Sprintf("%d", ss))
+		seek_f := fmt.Sprintf("%%%dd", size)
+		b.Logf("Scan Key format: [%s]", seek_f)
+		b.Logf("Key size: %d", size)
+		b.Logf("Example using 1,Scan Key format: [%s]", fmt.Sprintf(seek_f, 1))
+		b.Logf("Example using %d,Scan Key format: [%s]", bs, fmt.Sprintf(seek_f, bs))
+
 		for i := range bs {
 			v := fmt.Sprintf(f, i)
 			keys = append(keys, &v)
 		}
 		var m map[string]*KvSet[*string, any]
 		b.Run(
-			fmt.Sprintf("Native map, size: [%d], keys: [%d]", size, bs),
+			fmt.Sprintf("Native map, keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					m = make(map[string]*KvSet[*string, any], bs)
@@ -36,6 +43,9 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
+		if len(m) != bs {
+			b.Fatalf("Go map should contain: %d elements, got: %d", bs, len(m))
+		}
 
 		Cmp := func(a, b *string) int {
 			return cmp.Compare(
@@ -46,7 +56,7 @@ func BenchmarkNew(b *testing.B) {
 
 		var s *SliceTree[*string, any]
 		b.Run(
-			fmt.Sprintf("Slicetree, size [%d], count [%d]", size, bs),
+			fmt.Sprintf("Slicetree, Put, keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 
@@ -59,7 +69,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("Native map, Get size: [%d], keys: [%d]", size, bs),
+			fmt.Sprintf("Native map, Get, keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					for i := range bs {
@@ -69,12 +79,46 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("SliceTree, Get size: [%d], keys: [%d]", size, bs),
+			fmt.Sprintf("SliceTree, Get, keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					for i := range bs {
 						s.Get(keys[i])
 					}
+				}
+			},
+		)
+		b.Run(
+			fmt.Sprintf("Native map, Count between, keys: [%d]", bs),
+			func(b *testing.B) {
+				for range b.N {
+					count := 0
+					for i := range bs {
+						key := fmt.Sprintf(seek_f, i)
+						for check := range m {
+							if key >= check && key <= check {
+								count++
+							}
+						}
+					}
+					if count != bs {
+						b.Fatalf("Expected, %d, got %d", bs, count)
+					}
+				}
+			},
+		)
+		b.Run(
+			fmt.Sprintf("SliceTree, Count Between nodes keys: [%d]", bs),
+			func(b *testing.B) {
+				for range b.N {
+					count := 0
+					for i := range bs {
+						count += s.Between(keys[i], keys[i])
+					}
+					if count != bs {
+						b.Fail()
+					}
+
 				}
 			},
 		)
