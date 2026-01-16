@@ -242,7 +242,7 @@ This is a complex topic, but here is a short answer: Try turning memory benchmar
 
 __Comapring go map o(1) and omap.SliceTee o(log(n))__
 
-__Go map: o(1) How so?__  In truth go map converts the fist to bytes into 2 uint8, thoes 2 bytes are used as keys in a 2 tier tree, the remaing bytes then hit the o(1) or full scan.  This hits the sweet spot on most use cases.  The side effect is, keys are never going to be ordered.
+__Go map: o(1) How so?__  In truth go map converts the fist to bytes into 2 uint8, those 2 bytes are used as keys in a 2 tier tree, the remaing bytes then hit the o(1) or full scan.  This hits the sweet spot on most use cases.  The side effect is, keys are never going to be ordered.
 
 __omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with inifinite depth, indexed by sequence order. An omap.SliceTree instance is never a full scan, but depth of search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the tree.  This hits the sweet for range based lookups and massive data sets.  The side effect is an ordered index of keys.
 
