@@ -262,4 +262,4 @@ Is omap.SliceTree ever faster with ints or floats?
   - Yes on range scans
   - On Writes, Never
   - On Reads never on 16 bit number
-  - On Read after the first 16  cause a collision and only after ternary logic is faster on the least signifigant bits after the first 16 bits while operating on the entire integer
+  - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
