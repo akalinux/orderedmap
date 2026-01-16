@@ -3,16 +3,16 @@
 // Technically the omap package implements very minital btree using a slice.
 // The drivers of the design process, were the performance objectives.
 // The btree implementation is ordered and does not allow for duplicates;
-// The internals manage keys by splicing the internal slice, without the use of a temporary slice.
-// The side effect of this design results in what operates exactly like an ordered map.
+// The internals manage keys by splicing the internal slice.
+// The side effect of this design results in what operates exactly like ordered map.
+// Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.
+// An omap.SliceTree instance uses signifigantly less the memory than the map feature ing go.
 //
-// Unlike a map in go, keys are not constrained to a comparable type. In stead a compare funciton
-// must be passed to the constructor.
-//
-// Performance objectives:
+// Performance objectives while maintinaing a sorted map:
 //   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
 //   - All iteration operations are fixed cost of o(1).
-//   - Finding or removing elements between 2 elements is always a fixed cost of o(log(n) + log(n)).
+//
+// - Finding or removing elements between 2 points is always a fixed cost of o(log(n) + log(n)).
 //   - Finding elements before or after a given point is always a fixed cost of o(log n)
 //   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
 //   - Pre-emptive but predictable growth, this is done by setting the Growth size.

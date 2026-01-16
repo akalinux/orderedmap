@@ -4,8 +4,10 @@ Yet another sorted map in go.. but not really.
 Technically the omap package implements very minital btree using a slice.
 The drivers of the design process, were the performance objectives.
 The btree implementation is ordered and does not allow for duplicates;
-The internals manage keys by splicing the internal slice, without the use of a temporary slice.
+The internals manage keys by splicing the internal slice.
 The side effect of this design results in what operates exactly like ordered map.
+Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.
+An omap.SliceTree instance uses signifigantly less the memory than the map feature ing go.
 
 Performance objectives while maintinaing a sorted map:
   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
@@ -15,13 +17,13 @@ Performance objectives while maintinaing a sorted map:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
-## When Should you use omap?
+## When Should you use omap.SliceTree in place of a map?
 
 Any one of these is a practical use case:
   - An ordered map is required
+  - Memory constrained systems
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
-  - Memory usage is more important than write speed
   - Very large data sets where read speed is more important than write speed
   - Keys that can not be represented as a comparable value
   - When managing elements between ranges is required
@@ -165,8 +167,7 @@ Returns all values up to "Tomorrow".
 So benchmarks are always very subjective, but the real question is: what do we compare omap too?  The only real answer is the native map in go.
 Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to be an order of magnitude faster.
 
-__Disclamier:__ omap is built around a Compare function, this means the benchmark requires creating a proxy key that is equal
-to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like feature set.
+__Disclamier:__ omap.SliceTree is built around a Compare function, this means the benchmark requires creating a proxy key that is equal to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like compare between the native go map feature set and omap.SliceTree.
 
 __How well does omap compare native map feature in go?:__
 ```
@@ -198,16 +199,16 @@ On write:
 
 On read:
   - Go map is faster with smaller sets of keys
-  - SliceTree is faster on larger sets of keys
+  - omap.SliceTree is faster on larger sets of keys
 
 Where the native map in go always perfoms worse is in memory usage:
   - Go map uses about 45%-70% more memory than omap.SliceTree.
 
-So which is better?  Depends.. If you need very large sets of keys and you would have to create a proxy key to represent the raw key, then use SliceTree.
+So which is better for performance?  Depends.. If you need very large sets of keys and you would have to create a proxy key to represent the raw key, then use omap.SliceTree, other wise use map.
 
 __Why does the native map read slow down so much after 2500 elements?__
 
-Simple, memory bandwidth. SliceTree for the same kind of work, uses between 45%-70% less memory than a native map in go, also the inner workings of SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hasing operation is cheaper when it comes to cpu cycles, SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
+Simple, memory bandwidth. SliceTree for the same kind of work, uses between 45%-70% less memory than a native map in go, also the inner workings of SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hasing operation is cheaper when it comes to cpu cycles. omap.SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
 
 __Why is SliceTree always slower on write?__
 
