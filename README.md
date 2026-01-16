@@ -21,8 +21,10 @@ Any one of these is a practical use case:
   - An ordered map is required
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
-  - Memory is more important than cpu time for your maps
-  - Very large data sets are required and cpu wait time is important
+  - Memory usage is more important than write speed
+  - Very large data sets where read speed is more important than write speed
+  - Keys that can not be represented as a comparable value
+  - When managing elements between ranges is required
 
 ## Basic usage
 
@@ -168,25 +170,26 @@ to the key provided by the Cmp function.  In this benchmark the key used for the
 
 __How well does omap compare native map feature in go?:__
 ```
-BenchmarkNew/Native_map,_size:_[4],_keys:_[4900]-10                 8564            137682 ns/op          336080 B/op       4918 allocs/op
-BenchmarkNew/Slicetree,_size_[4],_count_[4900]-10                   2391            476826 ns/op          122928 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[4900]-10              850           1343170 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[4900]-10              2488            488563 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_size:_[4],_keys:_[6400]-10                 6124            193251 ns/op          372124 B/op       6418 allocs/op
-BenchmarkNew/Slicetree,_size_[4],_count_[6400]-10                   1804            649524 ns/op          155696 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[6400]-10              651           1804290 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[6400]-10              1810            664095 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_size:_[4],_keys:_[8100]-10                 4545            256010 ns/op          631312 B/op       8134 allocs/op
-BenchmarkNew/Slicetree,_size_[4],_count_[8100]-10                   1425            819092 ns/op          196656 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[8100]-10              331           3523981 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[8100]-10              1413            843227 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_size:_[5],_keys:_[10000]-10                3163            379898 ns/op          676912 B/op      10034 allocs/op
-BenchmarkNew/Slicetree,_size_[5],_count_[10000]-10                  1033           1078393 ns/op          245808 B/op          2 allocs/op
-BenchmarkNew/Native_map,_Get_size:_[5],_keys:_[10000]-10             354           3222406 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get_size:_[5],_keys:_[10000]-10             1135           1043204 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[1600]-10                26866             44408 ns/op           93056 B/op       1606 allocs/op
+BenchmarkNew/SliceTree,_size_[4],_count_[1600]-10                   9758            115444 ns/op           41008 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[1600]-10            10000            107863 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[1600]-10              8061            152664 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[2500]-10                15519             77506 ns/op          169264 B/op       2510 allocs/op
+BenchmarkNew/SliceTree,_size_[4],_count_[2500]-10                   6106            185458 ns/op           65584 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[2500]-10             3975            280004 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[2500]-10              5030            228491 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[3600]-10                10060            118377 ns/op          304880 B/op       3618 allocs/op
+BenchmarkNew/SliceTree,_size_[4],_count_[3600]-10                   3798            296544 ns/op           90160 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[3600]-10             2365            470665 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[3600]-10              3288            347730 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_size:_[4],_keys:_[4900]-10                 7450            155436 ns/op          336080 B/op       4918 allocs/op
+BenchmarkNew/SliceTree,_size_[4],_count_[4900]-10                   2485            467271 ns/op          122928 B/op          2 allocs/op
+BenchmarkNew/Native_map,_Get_size:_[4],_keys:_[4900]-10              840           1379415 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get_size:_[4],_keys:_[4900]-10              2437            495088 ns/op               0 B/op          0 allocs/op
 ```
 
 __How to read the benchmark__
+
 So what do these numbers really tell us?  Well nothing we didn't all ready know prior to the benchmark. The map feature of
 go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
 
@@ -195,19 +198,25 @@ On write:
 
 On read:
   - Go map is faster with smaller sets of keys
-  - Slicetree is faster on larger sets of keys
+  - SliceTree is faster on larger sets of keys
 
 Where the native map in go always perfoms worse is in memory usage:
   - Go map uses about 45%-70% more memory than omap.SliceTree.
 
 So which is better?  Depends.. If you need very large sets of keys and you would have to create a proxy key to represent the raw key, then use SliceTree.
 
-__Why does the native map read slow down so much after 1000 elements?__
+__Why does the native map read slow down so much after 2500 elements?__
 
-Simple, memory bandwidth. Slicetree will always use between 45%-70% less memory than a native map in go when doing the same thing.  Although the native go map hasing operation is cheaper when it comes to cpu cycles, Slicetree is built entierly around  a single slice and can often times stay entierly inside the cpu cache.
+Simple, memory bandwidth. SliceTree for the same kind of work, use between 45%-70% less memory than a native map in go, also the inner workings of SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hasing operation is cheaper when it comes to cpu cycles, SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
 
-__Why is Slicetree always slower on write?__
+__Why is SliceTree always slower on write?__
 
-Simple, memory bandwidth.  Slicetree uses a slice in memory and the elemetns are copied back and forth in blocks.
+Simple, memory bandwidth.  SliceTree uses a slice in memory and the elemetns are copied back and forth in blocks.
 Although the lookup and storage uses less memory, the write operation involes splicing an array, which will go to main memory 
-more often.  The very thing that gives SliceTree its read speed slows it down in write operations.
+more often.  The very thing that gives SliceTree its read speed at scale slows it down in write operations.
+
+__So which is better SliceTree or a map?__
+
+Very subjective.  Slicetree is built entirly around being able to find a range without scanning.  A map in go is
+built around quick reads and writes with very simple keys.  After a certan point Slicetree will always read faster, but 
+the native map feature will aways write faster.

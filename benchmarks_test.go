@@ -8,8 +8,8 @@ import (
 
 const BENCHMARK_STRING_SIZE = 1024
 const BENCHMARK_STRINGS = 100
-const BENCHMARK_START = 7
-const BENCHMARK_END = 10
+const BENCHMARK_START = 4
+const BENCHMARK_END = 7
 
 func BenchmarkNew(b *testing.B) {
 
