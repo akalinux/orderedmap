@@ -244,7 +244,7 @@ __Comapring go map o(1) and omap.SliceTee o(log(n))__
 
 __Go map: o(1) How so?__  In truth go map uses the first 2 bytes as keys in a 2 tier tree, the remaing bytes then hit the o(1) or full scan.  This is the sweet spot on most use cases.  The side effect is, keys are never going to be ordered.
 
-__omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with inifinite depth, indexed by sequence order. An omap.SliceTree instance is never a full scan, but depth of search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the tree.  This hits the sweet spot for range based lookups and massive data sets.  The side effect is an ordered index of keys.
+__omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with os type int(32|64) as its limit, indexed by sequence order. An omap.SliceTree instance is never a full scan, but an Order First Search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the array.  This hits the sweet spot for range based lookups and massive data sets.  The side effect is an ordered index of keys.
 
 __Odd Quirks of indexing__
 
