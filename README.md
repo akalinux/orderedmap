@@ -248,8 +248,8 @@ __omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with inifinite dep
 
 __Odd Quirks of indexing__
 
-So which is fater a 1 byte key using a map in go with 255 elements or omap.SliceTree?
-  - at a one byte key omap.SliceTree is fater
+So which is fater a 1 byte key using a map or omap.SliceTree?
+  - at a one byte key omap.SliceTree is faster
 
 So which is fater a 2 byte key using a map in go with 65535 elements or omap.SliceTree?
   - at 2 bytes a normal map in go is faster
@@ -263,4 +263,3 @@ Is omap.SliceTree ever faster with ints or floats?
   - On Writes, Never
   - On Reads, never on a 16 bit number, and only after ternary logic is faster on the least signifigant bits after the first 16 bits while operating on the entire integer
 
-  
