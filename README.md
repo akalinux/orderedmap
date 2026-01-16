@@ -222,7 +222,7 @@ Scanning all keys for every key is a known worst case.. so why include it?  Peop
 
 __Why does the native go map read slow down so much after 2500 elements?__
 
-Simple: memory bandwidth, omap.SliceTree for the same kind of work, uses between 45%-70% less memory than a native map in go. The inner workings of omap.SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hashing operation is cheaper when it comes to cpu cycles. omap.SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
+Its complicated, but its a combination of memory bandwidth and the internal go map doing full scans due to a large number of collisions.
 
 __Why is SliceTree always slower on write?__
 
