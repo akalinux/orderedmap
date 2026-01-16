@@ -207,7 +207,7 @@ So which is better?  Depends.. If you need very large sets of keys and you would
 
 __Why does the native map read slow down so much after 2500 elements?__
 
-Simple, memory bandwidth. SliceTree for the same kind of work, use between 45%-70% less memory than a native map in go, also the inner workings of SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hasing operation is cheaper when it comes to cpu cycles, SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
+Simple, memory bandwidth. SliceTree for the same kind of work, uses between 45%-70% less memory than a native map in go, also the inner workings of SliceTree is a single slice in memory.  This means memory reads for SliceTree are usually contiguous. Although the native go map hasing operation is cheaper when it comes to cpu cycles, SliceTree is built entierly around a single slice and can often times stay entierly inside the cpu cache on reads.  Even when going to main memory, a slice is usually a sequential set of reads, which greatly improve memory read performance.
 
 __Why is SliceTree always slower on write?__
 
