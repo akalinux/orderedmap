@@ -261,5 +261,5 @@ So when does omap.Slicetree actually become faster?
 Is omap.SliceTree ever faster with ints or floats?
   - Yes on range scans
   - On Writes, Never
-  - On Reads never on 16 bit number
+  - On Read, never on a16 bit number
   - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
