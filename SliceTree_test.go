@@ -708,6 +708,20 @@ func TestBetween(t *testing.T) {
 		3,    // expected row count
 		FIRST_KEY,
 	)
+	betweeTests(
+		t,
+		"single key and value to 0",
+		func() OrderedMap[int, int] {
+			s := New[int, int](cmp.Compare)
+			s.Put(1768886913099, 1)
+			return s.ToTs()
+		},
+		2*1768886913099, 1768886913099, // a,b
+		true,          // ok
+		1768886913099, // expected sum
+		1,             // expected row count
+		FIRST_KEY,
+	)
 
 }
 func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b int, ok bool, sum, count int, opt ...int) {
@@ -764,6 +778,7 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 		check += k
 		total++
 	}
+	t.Logf("Total count after RemoveBetweenKV: %d", s.Size())
 	if sum != check && count != total {
 		t.Fatalf("Failed iter test")
 	}
