@@ -98,3 +98,16 @@ func TestMerge(t *testing.T) {
 	dst.Merge(dst)
 
 }
+
+func TestBug(t *testing.T) {
+	s := NewSliceTree[int64, any](100, cmp.Compare)
+	s.Put(1769664118175, nil)
+	for range 1 {
+
+		iter := s.RemoveBetweenKV(-1, 1769664118175, FIRST_KEY)
+		for range iter {
+
+		}
+
+	}
+}
