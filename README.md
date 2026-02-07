@@ -1,4 +1,4 @@
-# OMAP an Ordered Map
+# OMAP an Sort Ordered Map
 Yet another sorted map in go.. but not really.
 
 Technically the omap package implements very minital btree using a slice.
