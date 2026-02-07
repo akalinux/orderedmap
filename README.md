@@ -136,9 +136,9 @@ The following table provides a general overview of the methods in OrderedMap.
 | FirstKey | | key K, ok bool | When ok is true the first key in the instance is returned |
 | LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
 | Between | a,b K, opt ...int| total int | Returns the number of elements between a and b. For options  [See](#between-options) |
-| BetweenKV | a,b K, opt ...int|  iter.Seq2[int, K] | Returns an iterator that contains the key/value pairs between a and b. For options  [See](#between-options) |
+| BetweenKV | a,b K, opt ...int|  iter.Seq2[K, V] | Returns an iterator that contains the key/value pairs between a and b. For options  [See](#between-options) |
 | RemoveBetween | a,b K, opt ...int| int | Returns the number of elements removed between a and b. For options  [See](#between-options) |
-| RemoveBetweenKV | a,b K, opt ...int|  iter.Seq2[int, K] | Returns an iterator that contains the key/value pairs that were moved from between a and b. For options  [See](#between-options) |
+| RemoveBetweenKV | a,b K, opt ...int|  iter.Seq2[K, V] | Returns an iterator that contains the key/value pairs that were moved from between a and b. For options  [See](#between-options) |
 | ThreadSafe | | bool | Returns true if this instance is thread safe |
 | Merge | set OrderedMap[K, V] |int | Merges set into this instance |
 | SetOverwrite | cb func(key K, oldValue, newValue V) | | Sets the callback method that fires before a value is overwritten |
@@ -165,7 +165,7 @@ Returns all values up to "Tomorrow".
 ## Benchmarks
 
 So benchmarks are always very subjective, but the real question is: what do we compare omap too?  The only real answer is the native map in go.
-Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to be an order of magnitude faster.
+Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to faster.
 
 __Disclamier:__ omap.SliceTree is built around a Compare function, this means the benchmark requires creating a proxy key that is equal to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like compare between the native go map feature and omap.SliceTree.
 
