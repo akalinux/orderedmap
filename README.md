@@ -131,7 +131,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
 | RemoveAll | | int | Clears all elements and returns how many elements were removed |
 | MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |
-| MassRemoveKV | keys ...K | iter.Seq2[int, K] |Tries to remove all keys provided. The iterator with a copy of all key value pairs that were removed |
+| MassRemoveKV | keys ...K | iter.Seq2[K, V] |Tries to remove all keys provided. The iterator with a copy of all key value pairs that were removed |
 | Size | | int | returns the number of key/value pairs in the instance |
 | FirstKey | | key K, ok bool | When ok is true the first key in the instance is returned |
 | LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
