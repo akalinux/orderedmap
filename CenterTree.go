@@ -85,7 +85,7 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				fmt.Printf("New begin: %d, New End: %d, new size: %d\n", begin, end, len(ns))
 				copy(ns[begin:idx+begin], s.Slices[0:idx])
 
-				copy(ns[begin+idx+1:], s.Slices[idx:])
+				copy(ns[begin+idx+1:end+1], s.Slices[idx:])
 				s.slices = ns
 				s.begin = begin
 				pos = s.begin + idx
