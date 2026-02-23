@@ -67,37 +67,33 @@ func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 
 	pos = -1
 	limit := cap(s.CenteredSlice) - 1
-	size := len(s.Slices)
+	os := 0
+	begin := 0
 	switch offset {
 	case -1:
 		diff := limit - s.End
 		if diff < s.Growth {
 			return -1
 		}
-		o := diff >> 1
-		begin := o - 1
-		ns := make([]KvSet[K, V], cap(s.CenteredSlice))
-
-		copy(ns[begin:begin+idx], s.Slices[0:idx])
-		copy(ns[begin+idx+1:], s.Slices[idx:size])
-		s.CenteredSlice = ns
-		s.Begin = begin
-		s.End = begin + size
-		pos = begin + idx
+		begin = (diff >> 1) - 1
 	case 1:
 		if s.Begin < s.Growth {
 			return -1
 		}
-		o := s.Begin >> 1
-		begin := o
-		ns := make([]KvSet[K, V], cap(s.CenteredSlice))
-		copy(ns[begin:begin+idx+1], s.Slices[0:idx+1])
-		copy(ns[begin+idx+2:], s.Slices[idx:size])
-		s.CenteredSlice = ns
-		pos = begin + idx + 1
-		s.Begin = begin
-		s.End = begin + size
+		os = 1
+		begin = s.Begin >> 1
+	default:
+		return -1
 	}
+	ns := make([]KvSet[K, V], cap(s.CenteredSlice))
+	copy(ns[begin:begin+idx+os], s.Slices[0:idx+os])
+	size := len(s.Slices)
+	copy(ns[begin+idx+1+os:], s.Slices[idx:size])
+	s.CenteredSlice = ns
+	pos = begin + idx + os
+	s.Begin = begin
+	s.End = begin + size
+
 	return
 }
 
