@@ -1,14 +1,15 @@
 package omap
 
 import (
-	"fmt"
+	"iter"
+	"slices"
 )
 
 type CenterTree[K any, V any] struct {
 	*SliceTree[K, V]
-	slices []KvSet[K, V]
-	begin  int
-	end    int
+	CenteredSlice []KvSet[K, V]
+	Begin         int
+	End           int
 }
 
 const MIN_GROWTH = 1
@@ -29,19 +30,83 @@ func NewCenterTree[K any, V any](growth int, cmp func(a, b K) int) *CenterTree[K
 			// pass an empty slice
 			Slices: slices[:0],
 		},
-		begin:  begin,
-		end:    begin,
-		slices: slices,
+		Begin:         begin,
+		End:           begin,
+		CenteredSlice: slices,
 	}
 
 }
 
+func (s CenterTree[K, V]) Remove(key K) (value V, ok bool) {
+	value, ok = s.SliceTree.Remove(key)
+	s.End = s.Begin + s.Size() - 1
+	return
+}
+func (s *CenterTree[K, V]) RemoveAll() (size int) {
+	size = s.Size() - 1
+	s.Begin = 0
+	s.End = 0
+	s.Slices = s.Slices[:0]
+
+	return
+}
+
+func (s *CenterTree[K, V]) MassRemove(keys ...K) (total int) {
+	total = s.SliceTree.MassRemove(keys...)
+	s.End = s.Begin + s.Size()
+	return
+}
+
+func (s *CenterTree[K, V]) MassRemoveKV(keys ...K) iter.Seq2[K, V] {
+	seq := s.SliceTree.MassRemoveKV(keys...)
+	s.End = s.Begin + s.Size()
+	return seq
+}
+
+func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
+
+	pos = -1
+	limit := cap(s.CenteredSlice) - 1
+	size := len(s.Slices)
+	switch offset {
+	case -1:
+		diff := limit - s.End
+		if diff < s.Growth {
+			return -1
+		}
+		o := diff >> 1
+		begin := o - 1
+		ns := make([]KvSet[K, V], cap(s.CenteredSlice))
+
+		copy(ns[begin:begin+idx], s.Slices[0:idx])
+		copy(ns[begin+idx+1:], s.Slices[idx:size])
+		s.CenteredSlice = ns
+		s.Begin = begin
+		s.End = begin + size
+		pos = begin + idx
+	case 1:
+		if s.Begin < s.Growth {
+			return -1
+		}
+		o := s.Begin >> 1
+		begin := o
+		ns := make([]KvSet[K, V], cap(s.CenteredSlice))
+		copy(ns[begin:begin+idx+1], s.Slices[0:idx+1])
+		copy(ns[begin+idx+2:], s.Slices[idx:size])
+		s.CenteredSlice = ns
+		pos = begin + idx + 1
+		s.Begin = begin
+		s.End = begin + size
+	}
+	return
+}
+
 func (s *CenterTree[K, V]) Put(k K, v V) {
 	size := len(s.Slices)
-	limit := cap(s.slices) - 1
+	limit := cap(s.CenteredSlice) - 1
 	if size == 0 {
-		s.slices[s.begin] = KvSet[K, V]{k, v}
-		s.Slices = s.slices[s.begin : s.begin+1]
+		s.CenteredSlice[s.Begin] = KvSet[K, V]{k, v}
+		s.Slices = s.CenteredSlice[s.Begin : s.Begin+1]
 		return
 	}
 
@@ -55,61 +120,76 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 		s.Slices[idx].Value = v
 		return
 	case -1:
-		begin := s.begin - 1
+		begin := s.Begin - 1
 		if begin >= 0 {
 			// copy left
-			fmt.Printf("Copy left block\n")
 			pos = idx + begin
-			copy(s.slices[begin:idx+s.begin], s.Slices[0:idx])
-			s.begin = begin
+			copy(s.CenteredSlice[begin:idx+s.Begin], s.Slices[0:idx])
+			s.Begin = begin
 		} else {
-			diff := limit - s.end
-			fmt.Printf("Diff: %d\n", diff)
-			if diff >= s.Growth {
-				// reballance
-				o := diff >> 1
-				begin := o - 1
-				end := s.end - o
-				fmt.Printf("reballance, begin: %d, end %d\n", begin, end)
-
-				copy(s.slices[begin:idx+begin], s.Slices[0:idx])
-				s.begin = begin
-				s.end = end
-				pos = begin + idx
-			} else {
+			pos = s.reballance(offset, idx)
+			if pos == -1 {
 				// grow
-				fmt.Printf("Grow left\n")
-				ns := make([]KvSet[K, V], len(s.slices)+s.Growth)
-				end := s.Growth + s.end
+				ns := make([]KvSet[K, V], len(s.CenteredSlice)+s.Growth)
+				end := s.Growth + s.End
 				begin := s.Growth - 1
-				fmt.Printf("New begin: %d, New End: %d, new size: %d\n", begin, end, len(ns))
 				copy(ns[begin:idx+begin], s.Slices[0:idx])
 
 				copy(ns[begin+idx+1:end+1], s.Slices[idx:])
-				s.slices = ns
-				s.begin = begin
-				pos = s.begin + idx
-				s.end = end
+				s.CenteredSlice = ns
+				s.Begin = begin
+				pos = s.Begin + idx
+				s.End = end
 			}
 		}
 	default:
-		end := s.end + 1
+		end := s.End + 1
 		if end > limit {
-			fmt.Printf("Todo\n")
-		} else {
-			if idx+s.begin == size-1 {
-				// simple append
-				s.end = end
-				pos = s.end
-			} else {
-
-				pos := s.begin + idx
-				fmt.Printf("Limit: %d,start: %d,end: %d\n", limit, pos+1, end)
-				copy(s.slices[pos+1:end], s.Slices[idx:size])
-				s.end = end
+			pos = s.reballance(offset, idx)
+			if pos == -1 {
+				s.CenteredSlice = slices.Grow(s.CenteredSlice, s.Growth)
+				pos = s.Begin + idx + 1
+				s.CenteredSlice = s.CenteredSlice[0:cap(s.CenteredSlice)]
+				copy(s.CenteredSlice[pos+1:end+1], s.Slices[idx+1:size])
+				s.End = end
+				pos = s.Begin + idx + 1
 			}
+
+		} else {
+
+			pos = s.Begin + idx + 1
+			copy(s.CenteredSlice[s.Begin+idx+1:end], s.Slices[idx:size])
+			s.End = end
 		}
 	}
-	s.slices[pos] = KvSet[K, V]{k, v}
-	s.Slices = s.slices[s.begin : s.end+1]
+	s.CenteredSlice[pos] = KvSet[K, V]{k, v}
+	s.Slices = s.CenteredSlice[s.Begin : s.End+1]
+}
+
+// SetGrowth implements [OrderedMap]
+func (s *CenterTree[K, V]) SetGrowth(grow int) {
+	if grow <= MIN_GROWTH {
+		s.Growth = MIN_GROWTH
+		return
+	}
+	s.Growth = grow
+}
+
+func (s *CenterTree[K, V]) ToTs() OrderedMap[K, V] {
+	return &ThreadSafeOrderedMap[K, V]{Tree: s}
+}
+
+// Merge implements [OrderedMap]
+func (s *CenterTree[K, V]) Merge(set OrderedMap[K, V]) int {
+	count := 0
+	// do not add to ourself!
+	if s == set {
+		return 0
+	}
+	// is this worth trying to optimize?
+	for k, v := range set.All() {
+		count++
+		s.Put(k, v)
+	}
+	return count
 }
