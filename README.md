@@ -1,11 +1,11 @@
-# OMAP an Sort Ordered Map
+# OMAP a Sorted sorted map
 Yet another sorted map in go.. but not really.
 
 Technically the omap package implements very minital btree using a slice.
 The drivers of the design process, were the performance objectives.
 The btree implementation is ordered and does not allow for duplicates;
 The internals manage keys by splicing the internal slice.
-The side effect of this design results in what operates exactly like ordered map.
+The side effect of this design results in what operates exactly like sorted map.
 Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.
 An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
 
@@ -20,7 +20,7 @@ Performance objectives while maintinaing a sorted map:
 ## When Should you use omap.SliceTree in place of a map?
 
 Any one of these is a practical use case:
-  - An ordered map is required
+  - An sorted map is required
   - Memory constrained systems
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
@@ -242,7 +242,7 @@ Scanning for any key between 2 strings:
 
 So which is better for performance?  Depends.. If you need very large sets of keys and you would have to create a proxy key to represent the raw key, then use omap.CenterTree, other wise use map.
 
-Scanning all keys for every key is a known worst case.. so why include it?  People do it, and most ordered map packages on [pkg.go.dev](https://pkg.go.dev) will force you do do that at least until you reach the end of your range.
+Scanning all keys for every key is a known worst case.. so why include it?  People do it, and most sorted map packages on [pkg.go.dev](https://pkg.go.dev) will force you do do that at least until you reach the end of your range.
 
 __Why does the native go map read slow down so much after 2500 elements?__
 
@@ -262,7 +262,7 @@ the go native map feature will aways write faster.  The go map implementation wi
 
 __Why include memory in benchmarks?__
 
-This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other sorted map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most sorted map implementations arn't performacne competative with the native map in go.  The omap.SliceTree/omap.CenterTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree and omap.CenterTree are signifigantly faster than the native map feature of go.  An instance of omap.SliceTree or omap.CenterTree do all this while being an ordered map, that is no small feat.
+This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other sorted map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most sorted map implementations arn't performacne competative with the native map in go.  The omap.SliceTree/omap.CenterTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree and omap.CenterTree are signifigantly faster than the native map feature of go.  An instance of omap.SliceTree or omap.CenterTree do all this while being an sorted map, that is no small feat.
 
 __Comapring go map o(1) and omap.SliceTee o(log(n))__
 
