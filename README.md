@@ -38,7 +38,7 @@ The omap package provides a common interface [OrderedMap](OrderedMap.go) impleme
 Creating ThreadSafe instance Example:
 
 ```
-	kv:=NewTs[string,string](cmp.Compare)
+	kv:=omap.NewTs[string,string](cmp.Compare)
 	// Save a value
 	kv.Put("Hello"," ")
 	kv.Put("World","!\n")
