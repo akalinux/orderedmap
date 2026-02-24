@@ -260,7 +260,7 @@ Simple: memory bandwidth.  omap.SliceTree uses a slice in memory and the elemetn
 Although the lookup and storage uses less memory, the write operation involes splicing an array, which will go to main memory 
 more often.  The very thing that gives omap.SliceTree its read speed at scale slows it down in write operations.
 
-__So which is better SliceTree CenterTreee or a map?__
+__So which is better SliceTree CenterTree or a map?__
 
 Very subjective, omap.Slicetree is built entirly around being able to find a range of keys without scanning. 
 The omap.CenterTree is otimized for pre-pending and appending data, but will can end up creating a temporary slice to do work,
