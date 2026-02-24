@@ -232,7 +232,7 @@ What Hardeware did you use?
 
 On write:
   - omap.CenterTree is faster ( when appending or prepending )
-  - All other write cases Go map is faster
+  - Most cases in smaller to medium data sets go's map is faster.. But not always.. ( will provide benchmarks that prove this someday )
 
 On read:
   - Go map is faster with smaller sets of keys
@@ -260,9 +260,11 @@ Simple: memory bandwidth.  omap.SliceTree uses a slice in memory and the elemetn
 Although the lookup and storage uses less memory, the write operation involes splicing an array, which will go to main memory 
 more often.  The very thing that gives omap.SliceTree its read speed at scale slows it down in write operations.
 
-__So which is better SliceTree or a map?__
+__So which is better SliceTree CenterTreee or a map?__
 
-Very subjective, omap.Slicetree is built entirly around being able to find a range of keys without scanning.  A map in go is
+Very subjective, omap.Slicetree is built entirly around being able to find a range of keys without scanning. 
+The omap.CenterTree is otimized for pre-pending and appending data, but will can end up creating a temporary slice to do work,
+which makes it use more than omap.SliceTree, but always less than go's internal map. A map in go is
 built around hashing bytes.  After a certan point omap.Slicetree will always read faster, but 
 the go native map feature will aways write faster.  The go map implementation will always use more memory than omap.SliceTree, but the native go map perfoms sligtly less than half the memory modification of omap.SliceTree on insertion/update.
 
