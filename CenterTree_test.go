@@ -82,6 +82,17 @@ func TestCenterTreePut(t *testing.T) {
 	Sane(16)
 	Sane(17)
 	Sane(20)
+
+	Lookup := func(set, value int, res bool) {
+
+		nt.Put(set, value)
+		if cmp, ok := nt.Get(set); ok != res || cmp != value {
+			t.Fatalf("Expected ok: %v, got: %v, expected value of: %d, got: %d", res, ok, value, cmp)
+		}
+	}
+	Lookup(7, -7, true)
+	Lookup(20, -20, true)
+	Lookup(-2, 200, true)
 }
 
 func TestCenterTreeRemove(t *testing.T) {
