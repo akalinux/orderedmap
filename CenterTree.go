@@ -49,8 +49,8 @@ func (s *CenterTree[K, V]) RemoveAll() (size int) {
 	size = s.Size() - 1
 	s.Begin = 0
 	s.End = 0
-	s.Slices = s.Slices[:0]
 
+	s.Slices = s.Slices[:0]
 	return
 }
 
@@ -119,7 +119,7 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 		} else if offset = Cmp(k, Slices[size-1].Key); offset > -1 {
 			idx = size - 1
 		} else {
-			idx, offset = GetIndex(k, Cmp, Slices[1:size])
+			idx, offset = GetIndex(k, Cmp, Slices[1:size-1])
 			idx++
 		}
 	} else {
@@ -165,9 +165,8 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 			}
 
 		} else {
-
 			pos = s.Begin + idx + 1
-			copy(s.CenteredSlice[s.Begin+idx+1:end], Slices[idx:size])
+			copy(s.CenteredSlice[s.Begin+idx+1:end+1], Slices[idx:size])
 			s.End = end
 		}
 	case 0:
@@ -237,7 +236,7 @@ func (s *CenterTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), o
 	begin, end, total, ok := s.betweenChecks(a, b, opt...)
 	cb(begin, end, total, ok)
 	if ok {
-		if begin == s.Begin && end == s.End {
+		if begin == 0 && s.Begin+end == s.End {
 			s.RemoveAll()
 			return
 		} else if begin == 0 {

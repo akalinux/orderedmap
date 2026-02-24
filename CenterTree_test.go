@@ -85,16 +85,68 @@ func TestCenterTreePut(t *testing.T) {
 
 	Lookup := func(set, value int, res bool) {
 
-		nt.Put(set, value)
+		if res {
+			nt.Put(set, value)
+		}
 		if cmp, ok := nt.Get(set); ok != res || cmp != value {
-			t.Fatalf("Expected ok: %v, got: %v, expected value of: %d, got: %d", res, ok, value, cmp)
+
+			t.Fatalf("Size: %d, Expected ok: %v, got: %v, expected value of: %d, got: %d", nt.Size(), res, ok, value, cmp)
 		}
 	}
 	Lookup(7, -7, true)
 	Lookup(20, -20, true)
 	Lookup(-2, 200, true)
+
+	check = []int{}
+	nt.RemoveAll()
+	Lookup(1, 0, false)
+	t.Logf("Out of order testing")
+	for _, k := range []int{7, 11, 12, 3, 8, 9, 4, 10, 1, 13, 2, 5, 20, 14, 15, 6, 16, 18, 19, 17} {
+		Sane(k)
+	}
+	for k, v := range nt.All() {
+		t.Logf("Key: %d, value: %d", k, v)
+	}
+	nt = NewCenterTree[int, int](2, cmp.Compare)
+	check = []int{}
+	Sane(2)
+	Sane(1)
+	Sane(0)
+	Sane(3)
+	Sane(4)
+	t.Log("Forc left hand side growth")
+	Sane(-1)
+
 }
 
+func TestCenterCoverageTests(t *testing.T) {
+	nt := NewCenterTree[int, int](2, cmp.Compare)
+	nt.Merge(nt)
+	//  Code coverage tests
+	nt.SetGrowth(-1)
+	nt.SetGrowth(3)
+	nt.ToTs()
+	nt.RemoveBetweenKV(1, 1)
+	nt.Put(1, 1)
+	if v, ok := nt.Get(1); !ok && v != 1 {
+		t.Fatalf("expected ok: true, got: %v, expected value: 1, got %d", ok, v)
+	}
+	s := NewCenterTree[int, int](2, cmp.Compare)
+	check := 0
+	for k, v := range nt.All() {
+		check += k + v
+	}
+	if check != 2 {
+		t.Fatalf("Expected a key value sum of: 2, got: %d", check)
+	}
+	if count := s.Merge(nt); count != 1 {
+		t.Fatalf("Expected a count of: 1, got %d", count)
+	}
+	nt.RemoveBetweenKV(1, 1)
+
+	s = NewCenterTree[int, int](-1, cmp.Compare)
+
+}
 func TestCenterTreeRemove(t *testing.T) {
 	s := NewCenterTree[int, int](2, cmp.Compare)
 	s.Put(1, 1)
