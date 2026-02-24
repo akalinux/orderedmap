@@ -17,7 +17,7 @@ Performance objectives while maintinaing a sorted map:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
-## When Should you use omap.SliceTree in place of a map?
+## When Should you use omap.CenterTree in place of a map?
 
 Any one of these is a practical use case:
   - An sorted map is required
@@ -87,7 +87,6 @@ Since lookups create both an index position and offsett, it becomes possible to 
 ## API
 
 __Constructors__
-
 
 The omap package supports any key type you can provide a compare function for, but a map in go only supports a comparable key type.  This means any map can be converted to an OrderedMap instance, but not every OrderedMap instance can be converted to a map.  
 | Function | Types | Arguments | Returns | Thread Safe |
