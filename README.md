@@ -99,7 +99,7 @@ The omap package supports any key type you can provide a compare function for, b
 | omap.ToMap | K comparable, V any | OrderedMap[K, V]| map[K]V | false |
 | omap.NewCenterTree | K any, V any | int, func(a, b K) int | *CenterTree[K, V] | false |
 
-As a note, any instance of SliceTree can create a thread safe instance of itself, by calling the s.ToTs() method.  If you create a thread safe instance, you should stop using the old instance.
+As a note, any instance of SliceTree or CenterTree can create a thread safe instance of itself, by calling the s.ToTs() method.  If you create a thread safe instance, you should stop using the old instance.
 
 Example conversion from map to a thread safe OrderedMap instance:
 ```go
