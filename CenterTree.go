@@ -37,11 +37,14 @@ func NewCenterTree[K any, V any](growth int, cmp func(a, b K) int) *CenterTree[K
 
 }
 
+// Remove implemenets [OrderedMap]
 func (s CenterTree[K, V]) Remove(key K) (value V, ok bool) {
 	value, ok = s.SliceTree.Remove(key)
 	s.End = s.Begin + s.Size() - 1
 	return
 }
+
+// RemoveAll implemenets [OrderedMap]
 func (s *CenterTree[K, V]) RemoveAll() (size int) {
 	size = s.Size() - 1
 	s.Begin = 0
@@ -51,15 +54,17 @@ func (s *CenterTree[K, V]) RemoveAll() (size int) {
 	return
 }
 
+// MassRemove implemenets [OrderedMap]
 func (s *CenterTree[K, V]) MassRemove(keys ...K) (total int) {
 	total = s.SliceTree.MassRemove(keys...)
 	s.End = s.Begin + s.Size()
 	return
 }
 
+// MassRemoveKV implemenets [OrderedMap]
 func (s *CenterTree[K, V]) MassRemoveKV(keys ...K) iter.Seq2[K, V] {
 	seq := s.SliceTree.MassRemoveKV(keys...)
-	s.End = s.Begin + s.Size()
+	s.End = s.Begin + s.Size() - 1
 	return seq
 }
 
@@ -69,21 +74,19 @@ func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 	limit := cap(s.CenteredSlice) - 1
 	os := 0
 	begin := 0
-	switch offset {
-	case -1:
+	if offset == -1 {
 		diff := limit - s.End
 		if diff < s.Growth {
 			return -1
 		}
 		begin = (diff >> 1) - 1
-	case 1:
+	} else {
 		if s.Begin < s.Growth {
 			return -1
 		}
 		os = 1
 		begin = s.Begin >> 1
-	default:
-		return -1
+
 	}
 	ns := make([]KvSet[K, V], cap(s.CenteredSlice))
 	copy(ns[begin:begin+idx+os], s.Slices[0:idx+os])
@@ -97,6 +100,7 @@ func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 	return
 }
 
+// Put implements [OrderedMap]
 func (s *CenterTree[K, V]) Put(k K, v V) {
 	size := len(s.Slices)
 	limit := cap(s.CenteredSlice) - 1
@@ -106,21 +110,31 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 		return
 	}
 
-	idx, offset := GetIndex(k, s.Cmp, s.Slices)
+	var idx int
+	var offset int
+	Cmp := s.Cmp
+	Slices := s.Slices
+	if size > 10 {
+		if Cmp(Slices[0].Key, k) == 1 {
+			offset = -1
+		} else if idx = size - 1; Cmp(Slices[idx].Key, k) == -1 {
+			offset = 1
+		} else {
+			idx, offset = GetIndex(k, Cmp, Slices[1:idx])
+			idx++
+		}
+	} else {
+		idx, offset = GetIndex(k, Cmp, Slices)
+	}
 	var pos int
 	switch offset {
-	case 0:
-		if s.OnOverWrite != nil {
-			s.OnOverWrite(k, s.Slices[idx].Value, v)
-		}
-		s.Slices[idx].Value = v
-		return
+
 	case -1:
 		begin := s.Begin - 1
 		if begin >= 0 {
 			// copy left
 			pos = idx + begin
-			copy(s.CenteredSlice[begin:idx+s.Begin], s.Slices[0:idx])
+			copy(s.CenteredSlice[begin:idx+s.Begin], Slices[0:idx])
 			s.Begin = begin
 		} else {
 			pos = s.reballance(offset, idx)
@@ -129,16 +143,16 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				ns := make([]KvSet[K, V], len(s.CenteredSlice)+s.Growth)
 				end := s.Growth + s.End
 				begin := s.Growth - 1
-				copy(ns[begin:idx+begin], s.Slices[0:idx])
+				copy(ns[begin:idx+begin], Slices[0:idx])
 
-				copy(ns[begin+idx+1:end+1], s.Slices[idx:])
+				copy(ns[begin+idx+1:end+1], Slices[idx:])
 				s.CenteredSlice = ns
 				s.Begin = begin
 				pos = s.Begin + idx
 				s.End = end
 			}
 		}
-	default:
+	case 1:
 		end := s.End + 1
 		if end > limit {
 			pos = s.reballance(offset, idx)
@@ -146,7 +160,7 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				s.CenteredSlice = slices.Grow(s.CenteredSlice, s.Growth)
 				pos = s.Begin + idx + 1
 				s.CenteredSlice = s.CenteredSlice[0:cap(s.CenteredSlice)]
-				copy(s.CenteredSlice[pos+1:end+1], s.Slices[idx+1:size])
+				copy(s.CenteredSlice[pos+1:end+1], Slices[idx+1:size])
 				s.End = end
 				pos = s.Begin + idx + 1
 			}
@@ -154,9 +168,15 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 		} else {
 
 			pos = s.Begin + idx + 1
-			copy(s.CenteredSlice[s.Begin+idx+1:end], s.Slices[idx:size])
+			copy(s.CenteredSlice[s.Begin+idx+1:end], Slices[idx:size])
 			s.End = end
 		}
+	case 0:
+		if s.OnOverWrite != nil {
+			s.OnOverWrite(k, Slices[idx].Value, v)
+		}
+		s.Slices[idx].Value = v
+		return
 	}
 	s.CenteredSlice[pos] = KvSet[K, V]{k, v}
 	s.Slices = s.CenteredSlice[s.Begin : s.End+1]
@@ -188,4 +208,48 @@ func (s *CenterTree[K, V]) Merge(set OrderedMap[K, V]) int {
 		s.Put(k, v)
 	}
 	return count
+}
+
+// RemoveBetween implements [OrderedMap]
+func (s *CenterTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int) {
+	s.clearBetween(a, b, func(x, y, t int, res bool) {
+		if res {
+			total = 1 + y - x
+		}
+	}, opt...)
+	return
+}
+
+// RemoveBetween implements [OrderedMap]
+func (s *CenterTree[K, V]) RemoveBetweenKV(a, b K, opt ...int) (removed iter.Seq2[K, V]) {
+	s.clearBetween(a, b, func(x, y, t int, res bool) {
+		if res {
+			o := y + 1
+			set := slices.Clone(s.Slices[x:o])
+			removed = KvIter(set)
+		} else {
+			removed = KvIter([]KvSet[K, V]{})
+		}
+	}, opt...)
+	return
+}
+
+func (s *CenterTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), opt ...int) {
+	begin, end, total, ok := s.betweenChecks(a, b, opt...)
+	cb(begin, end, total, ok)
+	if ok {
+		if begin == s.Begin && end == s.End {
+			s.RemoveAll()
+			return
+		} else if begin == 0 {
+			s.Begin = s.Begin + end + 1
+		} else if s.Begin+end == s.End {
+			s.End = s.Begin + begin - 1
+		} else {
+			s.Slices = slices.Delete(s.Slices, begin, 1+end)
+			s.End = s.Begin + s.Size() - 1
+			return
+		}
+		s.Slices = s.CenteredSlice[s.Begin : s.End+1]
+	}
 }

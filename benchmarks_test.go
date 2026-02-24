@@ -60,7 +60,7 @@ func BenchmarkNew(b *testing.B) {
 			func(b *testing.B) {
 				for range b.N {
 
-					s = NewSliceTree[*string, any](bs, Cmp)
+					s = NewSliceTree[*string, any](bs>>1, Cmp)
 					for i := range bs {
 						s.Put(keys[i], nil)
 					}
@@ -70,6 +70,23 @@ func BenchmarkNew(b *testing.B) {
 		)
 		if s.Size() != bs {
 			b.Fatalf("Go map should contain: %d elements, got: %d", bs, len(m))
+		}
+		var ct *CenterTree[*string, any]
+		b.Run(
+			fmt.Sprintf("CenterTree, Put, keys: [%d]", bs),
+			func(b *testing.B) {
+				for range b.N {
+
+					ct = NewCenterTree[*string, any](bs, Cmp)
+					for i := range bs {
+						ct.Put(keys[i], nil)
+					}
+				}
+
+			},
+		)
+		if ct.Size() != bs {
+			b.Fatalf("Go map should contain: %d elements, got: %d", bs, ct.Size())
 		}
 		b.Run(
 			fmt.Sprintf("Native map, Get, keys: [%d]", bs),
@@ -87,6 +104,16 @@ func BenchmarkNew(b *testing.B) {
 				for range b.N {
 					for i := range bs {
 						s.Get(keys[i])
+					}
+				}
+			},
+		)
+		b.Run(
+			fmt.Sprintf("CenterTree , Get, keys: [%d]", bs),
+			func(b *testing.B) {
+				for range b.N {
+					for i := range bs {
+						ct.Get(keys[i])
 					}
 				}
 			},
@@ -117,6 +144,21 @@ func BenchmarkNew(b *testing.B) {
 					count := 0
 					for i := range bs {
 						count += s.Between(keys[i], keys[i])
+					}
+					if count != bs {
+						b.Fail()
+					}
+
+				}
+			},
+		)
+		b.Run(
+			fmt.Sprintf("CenterTree, Count Between nodes keys: [%d]", bs),
+			func(b *testing.B) {
+				for range b.N {
+					count := 0
+					for i := range bs {
+						count += ct.Between(keys[i], keys[i])
 					}
 					if count != bs {
 						b.Fail()

@@ -114,3 +114,50 @@ func TestCenterTreeRemove(t *testing.T) {
 		t.Fatalf("Expected the set to be empty, tota: %d, size: %d", total, s.Size())
 	}
 }
+
+func TestCenterTreeRemoveBetween(t *testing.T) {
+	var s *CenterTree[int, int]
+
+	Reset := func() *CenterTree[int, int] {
+		s = NewCenterTree[int, int](2, cmp.Compare)
+		s.Put(1, 1)
+		s.Put(2, 2)
+		s.Put(3, 3)
+		return s
+	}
+	s = Reset()
+	if total := s.RemoveBetween(-1, 2); total != 2 && s.Size() == 1 {
+		t.Fatalf("Expected total of: 2, got: %d, expected size of: 1, got: %d ", total, s.Size())
+	}
+	Check := func(test string, expected, size, find, start, end int, opts ...int) {
+		t.Log(test)
+		s = Reset()
+		t.Logf("# -- Starting Begin: %d, End: %d -- $", s.Begin, s.End)
+		total := 0
+		for k, v := range s.RemoveBetweenKV(start, end, opts...) {
+			total += k + v
+		}
+		t.Logf("Exepcting all keys + values to provide a total value of %d", expected)
+		if total != expected && s.Size() == size {
+			t.Fatalf("Expected total of: %d, got: %d, expected size of: %d, got: %d ", expected, total, size, s.Size())
+		}
+		if _, ok := s.Get(find); !ok {
+			t.Fatalf("Expected key: %d to exist, but it does not", find)
+		}
+		for _, k := range []int{start, end} {
+			if _, ok := s.Get(k); ok {
+				t.Fatalf("%d should no longer exist in our data set", k)
+			}
+		}
+		t.Logf("# -- Ending Begin: %d, End: %d -- #", s.Begin, s.End)
+
+	}
+	Check("remove between -1,2", 6, 1, 3, -1, 2)
+
+	Check("remove between FIRST_KEY and 2", 6, 1, 3, 100, 2, FIRST_KEY)
+	Check("remove between, 2, 100", 10, 1, 1, 2, 100)
+	Check("Remove between 2 and LAST_KEY", 10, 1, 1, 2, -1, LAST_KEY)
+
+	Check("Remove mid: 2,2", 4, 2, 1, 2, 2)
+
+}
