@@ -262,7 +262,7 @@ the go native map feature will aways write faster.  The go map implementation wi
 
 __Why include memory in benchmarks?__
 
-This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other ordered map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most ordered map implementations arn't performacne competative with the native map in go.  The omap.SliceTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree is signifigantly faster than the native map feature of go.  An omap.SliceTree instance does all this while being an ordered map, that is no small feat.
+This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other sorted map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most sorted map implementations arn't performacne competative with the native map in go.  The omap.SliceTree/omap.CenterTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree and omap.CenterTree are signifigantly faster than the native map feature of go.  An instance of omap.SliceTree or omap.CenterTree do all this while being an ordered map, that is no small feat.
 
 __Comapring go map o(1) and omap.SliceTee o(log(n))__
 
@@ -292,7 +292,7 @@ Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
   - On Read, never on a16 bit number
   - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
 
-Why does omap.CenterTree have such good write perfomance.. is the 2x number real?
+Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map number real?
   - Its a trap!  In reality it omap.CenterTree is optimized for append and prepend.
   - This write performacne only holds tue for pre-pending or appending
   - The main cost of writes is getting the index positions required to update the index, not act writing to memory
