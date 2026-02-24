@@ -22,7 +22,7 @@
 //
 // Basic Example:
 //
-//	kv:=NewCenterTree[string,string](2,cmp.Compare)
+//	kv:=omap.NewCenterTree[string,string](2,cmp.Compare)
 //	// Save a value
 //	kv.Put("Hello"," ")
 //	kv.Put("World","!\n")
