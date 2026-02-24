@@ -170,6 +170,10 @@ Now this is in no way a fair comparison.. The omap package can use any data set,
 
 __Disclamier:__ omap.SliceTree is built around a Compare function and omap.CenterTree is optimized for: appending and prepending, this means the benchmark requires creating a proxy key that is equal to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like compare between the native go map feature and omap.SliceTree.
 
+The following holds true for these benchmarks
+  - All read/get operations are best case for go's internal map and worst case for omap.SliceTree and omap.CenterTree
+  - All write operations are worst case for omap.SliceTree and best case for go's internal map and omap.CenterTree
+
 __How well does omap compare native map feature in go?:__
 ```
 BenchmarkNew/Native_map_Put,_keys:_[1600]-10                               22788             52527 ns/op           93056 B/op       1606 allocs/op
@@ -213,7 +217,9 @@ BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[4900]-10                1281
 __How to read the benchmark__
 
 So what do these numbers really tell us?  Well nothing we didn't all ready know prior to the benchmark. The map feature of
-go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
+go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.  So we are looking at worst case reads for all omap based benhmarks and best case write for go's
+internal map and omap.CenterTree.  In that aspect omap.CenterTree is a little more twice as fast best case over go's internal map for 
+writes, but why?  Read to the end of this file for details.. Benchmarks are always a zero sum game!
 
 What version of go did you run this on?
   - 1.26
