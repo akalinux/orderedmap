@@ -17,7 +17,7 @@ Performance objectives while maintinaing a sorted map:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
-## When Should you use omap.SliceTree in place of a map?
+## When Should you use omap.CenterTree in place of a map?
 
 Any one of these is a practical use case:
   - An sorted map is required
@@ -38,7 +38,7 @@ The omap package provides a common interface [OrderedMap](OrderedMap.go) impleme
 Creating ThreadSafe instance Example:
 
 ```
-	kv:=NewTs[string,string](cmp.Compare)
+	kv:=omap.NewTs[string,string](cmp.Compare)
 	// Save a value
 	kv.Put("Hello"," ")
 	kv.Put("World","!\n")
@@ -87,7 +87,6 @@ Since lookups create both an index position and offsett, it becomes possible to 
 ## API
 
 __Constructors__
-
 
 The omap package supports any key type you can provide a compare function for, but a map in go only supports a comparable key type.  This means any map can be converted to an OrderedMap instance, but not every OrderedMap instance can be converted to a map.  
 | Function | Types | Arguments | Returns | Thread Safe |
@@ -170,6 +169,10 @@ Now this is in no way a fair comparison.. The omap package can use any data set,
 
 __Disclamier:__ omap.SliceTree is built around a Compare function and omap.CenterTree is optimized for: appending and prepending, this means the benchmark requires creating a proxy key that is equal to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like compare between the native go map feature and omap.SliceTree.
 
+The following holds true for these benchmarks
+  - All read/get operations are best case for go's internal map and worst case for omap.SliceTree and omap.CenterTree
+  - All write operations are worst case for omap.SliceTree and best case for go's internal map and omap.CenterTree
+
 __How well does omap compare native map feature in go?:__
 ```
 BenchmarkNew/Native_map_Put,_keys:_[1600]-10                               22788             52527 ns/op           93056 B/op       1606 allocs/op
@@ -213,7 +216,9 @@ BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[4900]-10                1281
 __How to read the benchmark__
 
 So what do these numbers really tell us?  Well nothing we didn't all ready know prior to the benchmark. The map feature of
-go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.
+go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.  So we are looking at worst case reads for all omap based benhmarks and best case write for go's
+internal map and omap.CenterTree.  In that aspect omap.CenterTree is a little more twice as fast best case over go's internal map for 
+writes, but why?  Read to the end of this file for details.. Benchmarks are always a zero sum game!
 
 What version of go did you run this on?
   - 1.26
@@ -226,7 +231,7 @@ What Hardeware did you use?
 
 On write:
   - omap.CenterTree is faster ( when appending or prepending )
-  - All other write cases Go map is faster
+  - Most cases in smaller to medium data sets go's map is faster.. But not always.. ( will provide benchmarks that prove this someday )
 
 On read:
   - Go map is faster with smaller sets of keys
@@ -254,11 +259,14 @@ Simple: memory bandwidth.  omap.SliceTree uses a slice in memory and the elemetn
 Although the lookup and storage uses less memory, the write operation involes splicing an array, which will go to main memory 
 more often.  The very thing that gives omap.SliceTree its read speed at scale slows it down in write operations.
 
-__So which is better SliceTree or a map?__
+__So which is better SliceTree CenterTree or a map?__
 
-Very subjective, omap.Slicetree is built entirly around being able to find a range of keys without scanning.  A map in go is
-built around hashing bytes.  After a certan point omap.Slicetree will always read faster, but 
-the go native map feature will aways write faster.  The go map implementation will always use more memory than omap.SliceTree, but the native go map perfoms sligtly less than half the memory modification of omap.SliceTree on insertion/update.
+Very subjective, omap.Slicetree is built entirly around being able to find a range of keys without scanning. 
+The omap.CenterTree is optimized for pre-pending and appending data, but will can end up creating a temporary slice to do work,
+which makes it in theory use more memory than omap.SliceTree, but always less than go's internal map. A map in go is
+built around hashing bytes.  After a certan point omap.CenterTree will always read faster on both read and write, but 
+where that point is, greatly depends on the data set you are working with.  The go map implementation will always use more memory than
+ omap.SliceTree and omap.CenterTree.
 
 __Why include memory in benchmarks?__
 
@@ -295,4 +303,4 @@ Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
 Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map number real?
   - Its a trap!  In reality it omap.CenterTree is optimized for append and prepend.
   - This write performacne only holds tue for pre-pending or appending
-  - The main cost of writes is getting the index positions required to update the index, not act writing to memory
+  - The main cost of writes is getting the index positions required to update the array, not writing to memory

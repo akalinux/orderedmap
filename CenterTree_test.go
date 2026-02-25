@@ -2,6 +2,7 @@ package omap
 
 import (
 	"cmp"
+	"slices"
 	"testing"
 )
 
@@ -29,17 +30,23 @@ func TestCenterTreePut(t *testing.T) {
 			return
 		}
 		check = append(check, k)
-		if size := len(check); size != nt.Size() {
+
+		slices.Sort(check)
+		dedupe := slices.Compact(check)
+		if size := len(dedupe); size != nt.Size() {
+			t.Logf("Src Array: %v", dedupe)
 			t.Fatalf("Expected size: %d, got: %d", size, nt.Size())
 			return
 		}
-		for _, id := range check {
-			if _, ok := nt.Get(id); !ok {
+
+		for id, k := range dedupe {
+
+			if v, ok := nt.Get(k); !ok || v != dedupe[id] {
 				t.Log("*** Error: Dumping out state of the array")
 				for key, value := range nt.All() {
 					t.Logf("key: %d, value %d", key, value)
 				}
-				t.Fatalf("nt.Get(%d) should return true for key: %d", id, id)
+				t.Fatalf("nt.Get(%d) should return true for key: %d and value of: %d, but got: %d", k, k, v, k)
 				return
 			}
 		}
@@ -52,6 +59,7 @@ func TestCenterTreePut(t *testing.T) {
 	if v, ok := nt.Get(3); !ok || v != -3 || overwrite != 1 {
 		t.Fatalf("Expected true for ok, got: %v, expected -3 for value got: %v, overwrite should be 1, got %d", ok, v, overwrite)
 	}
+	nt.Put(3, 3)
 
 	t.Logf("Preprend tests")
 	Sane(2)
@@ -82,8 +90,84 @@ func TestCenterTreePut(t *testing.T) {
 	Sane(16)
 	Sane(17)
 	Sane(20)
+
+	Lookup := func(set, value int, res bool) {
+
+		if res {
+			nt.Put(set, value)
+		}
+		if cmp, ok := nt.Get(set); ok != res || cmp != value {
+
+			t.Fatalf("Size: %d, Expected ok: %v, got: %v, expected value of: %d, got: %d", nt.Size(), res, ok, value, cmp)
+		}
+	}
+	Lookup(7, -7, true)
+	Lookup(20, -20, true)
+	Lookup(-2, 200, true)
+
+	check = []int{}
+	nt.RemoveAll()
+	Lookup(1, 0, false)
+	t.Logf("Out of order testing")
+	for _, k := range []int{7, 11, 12, 3, 8, 9, 4, 10, 1, 13, 2, 5, 20, 14, 15, 6, 16, 18, 19, 17} {
+		Sane(k)
+	}
+	for k, v := range nt.All() {
+		t.Logf("Key: %d, value: %d", k, v)
+	}
+	nt = NewCenterTree[int, int](2, cmp.Compare)
+	check = []int{}
+	Sane(2)
+	Sane(1)
+	Sane(0)
+	Sane(3)
+	Sane(4)
+	t.Log("Forc left hand side growth")
+	Sane(-1)
+
+	t.Logf("** Known probelm data sets that can reveal bugs")
+	for setId, set := range [][]int{
+		{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
+		{8, 9, 7, 3, 5, 4, 6, 0, 1, 2},
+		{67, 84, 54, 66, 187, 11, 0, 1, 2, 3, 11, 245},
+	} {
+		nt = NewCenterTree[int, int](2, cmp.Compare)
+		check = []int{}
+		t.Logf("Testing setID: %d", setId)
+		for _, k := range set {
+			Sane(k)
+		}
+	}
 }
 
+func TestCenterCoverageTests(t *testing.T) {
+	nt := NewCenterTree[int, int](2, cmp.Compare)
+	nt.Merge(nt)
+	//  Code coverage tests
+	nt.SetGrowth(-1)
+	nt.SetGrowth(3)
+	nt.ToTs()
+	nt.RemoveBetweenKV(1, 1)
+	nt.Put(1, 1)
+	if v, ok := nt.Get(1); !ok && v != 1 {
+		t.Fatalf("expected ok: true, got: %v, expected value: 1, got %d", ok, v)
+	}
+	s := NewCenterTree[int, int](2, cmp.Compare)
+	check := 0
+	for k, v := range nt.All() {
+		check += k + v
+	}
+	if check != 2 {
+		t.Fatalf("Expected a key value sum of: 2, got: %d", check)
+	}
+	if count := s.Merge(nt); count != 1 {
+		t.Fatalf("Expected a count of: 1, got %d", count)
+	}
+	nt.RemoveBetweenKV(1, 1)
+
+	s = NewCenterTree[int, int](-1, cmp.Compare)
+
+}
 func TestCenterTreeRemove(t *testing.T) {
 	s := NewCenterTree[int, int](2, cmp.Compare)
 	s.Put(1, 1)
