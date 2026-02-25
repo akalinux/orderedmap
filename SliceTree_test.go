@@ -590,139 +590,150 @@ func TestBetween(t *testing.T) {
 		}
 		return s
 	}
-	betweeTests(
-		t,
-		"between 0 and 5",
-		cb,
-		1, 3, // a,b
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-	)
+	cb2 := func() OrderedMap[int, int] {
+		s := NewCenterTree[int, int](2, cmp.Compare)
+		for i := range 4 {
+			s.Put(i*5, i+111)
+		}
+		return s
+	}
 
-	betweeTests(
-		t,
-		"between 5 and 10",
-		cb,
-		6, 9, // a,b NICE!
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-	)
-	betweeTests(
-		t,
-		"around 10",
-		cb,
-		9, 11, // a,b NICE!
-		true, // ok
-		10,   // expected sum
-		1,    // expected row count
-	)
+	for _, cb := range []func() OrderedMap[int, int]{cb, cb2} {
 
-	betweeTests(
-		t,
-		"Around 0",
-		cb,
-		-400, 3, // a,b
-		true, // ok
-		0,    // expected sum
-		1,    // expected row count
-	)
-	betweeTests(
-		t,
-		"Exact Match 5",
-		cb,
-		5, 5, // a,b
-		true, // ok
-		5,    // expected sum
-		1,    // expected row count
-	)
-	betweeTests(
-		t,
-		"Exact Match 10,15",
-		cb,
-		10, 15, // a,b
-		true, // ok
-		25,   // expected sum
-		2,    // expected row count
-	)
-	betweeTests(
-		t,
-		"Around 15",
-		cb,
-		14, 16, // a,b
-		true, // ok
-		15,   // expected sum
-		1,    // expected row count
-	)
+		betweeTests(
+			t,
+			"between 0 and 5",
+			cb,
+			1, 3, // a,b
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+		)
 
-	betweeTests(
-		t,
-		"After tests",
-		cb,
-		16, 16, // a,b
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-	)
+		betweeTests(
+			t,
+			"between 5 and 10",
+			cb,
+			6, 9, // a,b NICE!
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+		)
+		betweeTests(
+			t,
+			"around 10",
+			cb,
+			9, 11, // a,b NICE!
+			true, // ok
+			10,   // expected sum
+			1,    // expected row count
+		)
 
-	betweeTests(
-		t,
-		"Before tests",
-		cb,
-		-111, -7, // a,b
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-	)
+		betweeTests(
+			t,
+			"Around 0",
+			cb,
+			-400, 3, // a,b
+			true, // ok
+			0,    // expected sum
+			1,    // expected row count
+		)
+		betweeTests(
+			t,
+			"Exact Match 5",
+			cb,
+			5, 5, // a,b
+			true, // ok
+			5,    // expected sum
+			1,    // expected row count
+		)
+		betweeTests(
+			t,
+			"Exact Match 10,15",
+			cb,
+			10, 15, // a,b
+			true, // ok
+			25,   // expected sum
+			2,    // expected row count
+		)
+		betweeTests(
+			t,
+			"Around 15",
+			cb,
+			14, 16, // a,b
+			true, // ok
+			15,   // expected sum
+			1,    // expected row count
+		)
 
-	betweeTests(
-		t,
-		"use firstKey, negative test",
-		cb,
-		0, -7, // a,b
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-		FIRST_KEY,
-	)
+		betweeTests(
+			t,
+			"After tests",
+			cb,
+			16, 16, // a,b
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+		)
 
-	betweeTests(
-		t,
-		"use lastKey, negative test",
-		cb,
-		16, -7, // a,b
-		false, // ok
-		0,     // expected sum
-		0,     // expected row count
-		LAST_KEY,
-	)
+		betweeTests(
+			t,
+			"Before tests",
+			cb,
+			-111, -7, // a,b
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+		)
 
-	betweeTests(
-		t,
-		"use firstkey, up to 11",
-		cb,
-		16, 11, // a,b
-		true, // ok
-		15,   // expected sum
-		3,    // expected row count
-		FIRST_KEY,
-	)
-	betweeTests(
-		t,
-		"single key and value to 0",
-		func() OrderedMap[int, int] {
-			s := New[int, int](cmp.Compare)
-			s.Put(1768886913099, 1)
-			return s.ToTs()
-		},
-		2*1768886913099, 1768886913099, // a,b
-		true,          // ok
-		1768886913099, // expected sum
-		1,             // expected row count
-		FIRST_KEY,
-	)
+		betweeTests(
+			t,
+			"use firstKey, negative test",
+			cb,
+			0, -7, // a,b
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+			FIRST_KEY,
+		)
 
+		betweeTests(
+			t,
+			"use lastKey, negative test",
+			cb,
+			16, -7, // a,b
+			false, // ok
+			0,     // expected sum
+			0,     // expected row count
+			LAST_KEY,
+		)
+
+		betweeTests(
+			t,
+			"use firstkey, up to 11",
+			cb,
+			16, 11, // a,b
+			true, // ok
+			15,   // expected sum
+			3,    // expected row count
+			FIRST_KEY,
+		)
+		betweeTests(
+			t,
+			"single key and value to 0",
+			func() OrderedMap[int, int] {
+				s := New[int, int](cmp.Compare)
+				s.Put(1768886913099, 1)
+				return s.ToTs()
+			},
+			2*1768886913099, 1768886913099, // a,b
+			true,          // ok
+			1768886913099, // expected sum
+			1,             // expected row count
+			FIRST_KEY,
+		)
+
+	}
 }
 func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b int, ok bool, sum, count int, opt ...int) {
 	s := cb()

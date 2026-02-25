@@ -2,6 +2,7 @@ package omap
 
 import (
 	"cmp"
+	"slices"
 	"testing"
 )
 
@@ -29,10 +30,15 @@ func TestCenterTreePut(t *testing.T) {
 			return
 		}
 		check = append(check, k)
-		if size := len(check); size != nt.Size() {
+
+		slices.Sort(check)
+		dedupe := slices.Compact(check)
+		if size := len(dedupe); size != nt.Size() {
+			t.Logf("Src Array: %v", dedupe)
 			t.Fatalf("Expected size: %d, got: %d", size, nt.Size())
 			return
 		}
+
 		for _, id := range check {
 			if _, ok := nt.Get(id); !ok {
 				t.Log("*** Error: Dumping out state of the array")
@@ -117,6 +123,19 @@ func TestCenterTreePut(t *testing.T) {
 	t.Log("Forc left hand side growth")
 	Sane(-1)
 
+	t.Logf("** Known probelm data sets that can reveal bugs")
+	for setId, set := range [][]int{
+		{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
+		{8, 9, 7, 3, 5, 4, 6, 0, 1, 2},
+		{67, 84, 54, 66, 187, 11, 0, 1, 2, 3, 11, 245},
+	} {
+		nt = NewCenterTree[int, int](2, cmp.Compare)
+		check = []int{}
+		t.Logf("Testing setID: %d", setId)
+		for _, k := range set {
+			Sane(k)
+		}
+	}
 }
 
 func TestCenterCoverageTests(t *testing.T) {
