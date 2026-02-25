@@ -115,22 +115,21 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 	Cmp := s.Cmp
 	Slices := s.Slices
 	if size > 10 {
-		if offset = Cmp(k, Slices[0].Key); offset < 1 {
+		mid := getMid(size)
+		mo := Cmp(k, Slices[mid].Key)
+		if mo == 0 {
+			idx = mo
+
+		} else if offset = Cmp(k, Slices[0].Key); offset < 1 {
 		} else if offset = Cmp(k, Slices[size-1].Key); offset > -1 {
 			idx = size - 1
-		} else {
-			mid := getMid(size)
-			offset = Cmp(k, Slices[mid].Key)
-			if offset == 0 {
-				idx = mid
-			} else if offset < 0 {
-				idx, offset = GetIndex(k, Cmp, Slices[1:mid-1])
-				idx++
+		} else if mo < 0 {
+			idx, offset = GetIndex(k, Cmp, Slices[1:mid-1])
+			idx++
 
-			} else {
-				idx, offset = GetIndex(k, Cmp, Slices[mid+1:size-1])
-				idx += mid + 1
-			}
+		} else {
+			idx, offset = GetIndex(k, Cmp, Slices[mid+1:size-1])
+			idx += mid + 1
 		}
 	} else {
 		idx, offset = GetIndex(k, Cmp, Slices)
