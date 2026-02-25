@@ -120,8 +120,23 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 		} else if idx = size - 1; Cmp(Slices[idx].Key, k) == -1 {
 			offset = 1
 		} else {
+<<<<<<< Updated upstream
 			idx, offset = GetIndex(k, Cmp, Slices[1:idx])
 			idx++
+=======
+			mid := getMid(size)
+			offset = Cmp(k, Slices[mid].Key)
+			if offset == 0 {
+				idx = mid
+			} else if offset < 0 {
+				idx, offset = GetIndex(k, Cmp, Slices[1:mid-1])
+				idx++
+
+			} else {
+				idx, offset = GetIndex(k, Cmp, Slices[mid+1:size-1])
+				idx += mid + 1
+			}
+>>>>>>> Stashed changes
 		}
 	} else {
 		idx, offset = GetIndex(k, Cmp, Slices)
