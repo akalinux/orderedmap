@@ -39,13 +39,14 @@ func TestCenterTreePut(t *testing.T) {
 			return
 		}
 
-		for _, id := range check {
-			if _, ok := nt.Get(id); !ok {
+		for id, k := range dedupe {
+
+			if v, ok := nt.Get(k); !ok || v != dedupe[id] {
 				t.Log("*** Error: Dumping out state of the array")
 				for key, value := range nt.All() {
 					t.Logf("key: %d, value %d", key, value)
 				}
-				t.Fatalf("nt.Get(%d) should return true for key: %d", id, id)
+				t.Fatalf("nt.Get(%d) should return true for key: %d and value of: %d, but got: %d", k, k, v, k)
 				return
 			}
 		}
@@ -58,6 +59,7 @@ func TestCenterTreePut(t *testing.T) {
 	if v, ok := nt.Get(3); !ok || v != -3 || overwrite != 1 {
 		t.Fatalf("Expected true for ok, got: %v, expected -3 for value got: %v, overwrite should be 1, got %d", ok, v, overwrite)
 	}
+	nt.Put(3, 3)
 
 	t.Logf("Preprend tests")
 	Sane(2)
