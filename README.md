@@ -292,7 +292,7 @@ Scanning for any key between 2 strings:
   - omap.SliceTree and omap.CenterTree are just o(log(n)+log(n))
 
 So which is better for performance? For strings omap.SliceTree or omap.CenterTree, for int/float there is a use case for go's internal map
-but its benefits don' outweigh its losses.
+but its benefits don't outweigh its losses.
 
 Scanning all keys for every key is a known worst case.. so why include it?  People do it, and most sorted map packages on [pkg.go.dev](https://pkg.go.dev) will force you do do that at least until you reach the end of your range.
 
@@ -310,7 +310,7 @@ __So which is better SliceTree CenterTree or a map?__
 When it comes to read performance of strings, omap.SliceTree and omap.CenterTree are always faster.
 The omap.Slicetree object is built entirly around being able to find a range of keys without scanning. 
 The omap.CenterTree is optimized for pre-pending and appending data to the slice.  The map provided by go is built around hashing.
-WHen it comes to a map of uint64, go's internal map has both a read and write performance advantage.
+WHen it comes to a map of uint64, go's internal map has a slight edge in performance.
 
 __Why include memory in benchmarks?__
 
