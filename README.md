@@ -321,7 +321,8 @@ the fist value or after the last value are super cheap. When you write to the mi
 __Odd Quirks of indexing__
 
 So which is faster a 1 byte key using a map or omap.SliceTree?
-  - at a one byte key omap.SliceTree is faster
+  - On Write: omap.CenterTree is faster for append and prepend
+  - On Read: go's map is slightly faster than omap.SliceTree
 
 So which is faster a 2 byte key using a map in go with 65535 elements or omap.SliceTree?
   - at 2 bytes a normal map in go is faster
@@ -333,10 +334,10 @@ So when does omap.Slicetree actually become faster?
 Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
   - Yes on range scans
   - On Writes for strings, On append or prepend omap.CenterTree is always faster
-  - On Read, never on a16 bit number
+  - On Read, never on a 16 bit number
   - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
 
-Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map number real?
+Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map real?
   - Its a trap!  In reality it omap.CenterTree is optimized for append and prepend.
-  - This write performacne only holds tue for pre-pending or appending
+  - This write performacne only holds true for pre-pending or appending
   - The main cost of writes is getting the index positions required to update the array, not writing to memory
