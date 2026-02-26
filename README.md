@@ -341,10 +341,7 @@ So when does omap.Slicetree actually become faster?
 
 Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
   - Yes on range scans
-  - On Writes for strings, On append or prepend omap.CenterTree is always faster
-  - On Read, never on a 16 bit number
-  - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
 
 Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map real?
   - Its a trap!  In reality it omap.CenterTree is optimized for append and prepend.
-  - if not appending or pre-pending there is roughly a 30% write performance penalty due to the O(log n) lookup tax
+  - if not appending or pre-pending there is roughly a 30-50% write performance penalty due to the O(log n) lookup tax
