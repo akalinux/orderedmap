@@ -47,7 +47,8 @@ func NewFromMap[K comparable, V any](m map[K]V, cb func(a, b K) int) *SliceTree[
 }
 
 func getMid(size int) int {
-	// shift right 1 same sa divide  by 2.. gotta love int maths
+	// shift right 1 same as divide  by 2, bitwise is always faster
+	// size&1 is the same as size%2, but biwise is faster
 	return (size-2)>>1 + size&1
 }
 
