@@ -30,7 +30,7 @@ __On Write for strings__:
 ## When Should you use omap.CenterTree in place of a map?
 
 Any one of these is a practical use case:
-  - You need something that can find values based on strings strings faster than go's internal map
+  - When using strings as keys and read performance matters
   - A sorted map is required
   - Memory constrained systems
   - Fuzzy logic is required, IE the ability to find points in between keys
