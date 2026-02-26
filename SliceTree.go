@@ -256,6 +256,7 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 	var diff int
 	for {
 		offset = Cmp(k, Slices[mid].Key)
+		// A switch statement is not optimal!
 		switch offset {
 		case 0:
 			resolved = true
@@ -294,6 +295,16 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 			return
 		}
 	}
+}
+
+func idxResolved[K any, V any](k K, index, offset, mid int, Cmp func(a, b K) int, Slices []KvSet[K, V]) (idx, os int) {
+
+	index = offset + mid
+	if index < 0 {
+		return mid, offset
+	}
+	offset = Cmp(k, Slices[index].Key)
+	return
 }
 
 // Returns an iterator for the current keys.

@@ -102,7 +102,8 @@ func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 
 // Put implements [OrderedMap]
 func (s *CenterTree[K, V]) Put(k K, v V) {
-	size := len(s.Slices)
+	Slices := s.Slices
+	size := len(Slices)
 	limit := cap(s.CenteredSlice) - 1
 	if size == 0 {
 		s.CenteredSlice[s.Begin] = KvSet[K, V]{k, v}
@@ -113,14 +114,24 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 	var idx int
 	var offset int
 	Cmp := s.Cmp
-	Slices := s.Slices
 	if size > 10 {
 		if offset = Cmp(k, Slices[0].Key); offset < 1 {
 		} else if offset = Cmp(k, Slices[size-1].Key); offset > -1 {
 			idx = size - 1
 		} else {
-			idx, offset = GetIndex(k, Cmp, Slices[1:size-1])
-			idx++
+			mid := getMid(size)
+			offset = Cmp(k, Slices[mid].Key)
+			switch offset {
+			case 0:
+				idx = mid
+			case -1:
+				idx, offset = GetIndex(k, Cmp, Slices[1:mid])
+				idx++
+			default:
+
+				idx, offset = GetIndex(k, Cmp, Slices[mid+1:size-1])
+				idx += mid + 1
+			}
 		}
 	} else {
 		idx, offset = GetIndex(k, Cmp, Slices)
