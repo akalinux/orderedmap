@@ -9,6 +9,8 @@ The side effect of this design results in what operates exactly like sorted map.
 Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.
 An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
 
+# Performance Matters
+
 Performance objectives while maintinaing a sorted map:
   - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
   - All iteration operations are fixed cost of o(1).
@@ -16,8 +18,6 @@ Performance objectives while maintinaing a sorted map:
   - Finding elements: at, before, or after a given point is always a fixed cost of o(log n)
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
-
-# Performance Matters
 
 __On Read For strings__:
   - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
