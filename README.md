@@ -175,42 +175,78 @@ The following holds true for these benchmarks
 
 __How well does omap compare native map feature in go?:__
 ```
-BenchmarkNew/Native_map_Put,_keys:_[1600]-10                               22788             52527 ns/op           93056 B/op       1606 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[1600]-10                                8947            121481 ns/op           90160 B/op          4 allocs/op
-BenchmarkNew/CenterTree,_Put,_keys:_[1600]-10                              49328             24619 ns/op           82016 B/op          3 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[1600]-10                              10000            108199 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[1600]-10                                7966            150501 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_,_Get,_keys:_[1600]-10                              7321            152516 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[1600]-10                       64          17650692 ns/op           22550 B/op       2944 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[1600]-10                 4399            273120 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[1600]-10                4406            274492 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put,_keys:_[2500]-10                               15567             77685 ns/op          169264 B/op       2510 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[2500]-10                                5505            197154 ns/op          155696 B/op          4 allocs/op
-BenchmarkNew/CenterTree,_Put,_keys:_[2500]-10                              28598             41466 ns/op          122976 B/op          3 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[2500]-10                               5166            204630 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[2500]-10                                5078            229907 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_,_Get,_keys:_[2500]-10                              5084            232709 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[2500]-10                       26          42240584 ns/op           36982 B/op       4744 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[2500]-10                 2780            422824 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[2500]-10                2833            434941 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put,_keys:_[3600]-10                                9367            124997 ns/op          304880 B/op       3618 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[3600]-10                                3429            308869 ns/op          204848 B/op          4 allocs/op
-BenchmarkNew/CenterTree,_Put,_keys:_[3600]-10                              21578             55250 ns/op          180320 B/op          3 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[3600]-10                               2738            391329 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[3600]-10                                3268            348179 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_,_Get,_keys:_[3600]-10                              3428            344963 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[3600]-10                        9         121407124 ns/op           54710 B/op       6944 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[3600]-10                 1820            628382 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[3600]-10                1905            628054 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put,_keys:_[4900]-10                                7759            152756 ns/op          336080 B/op       4918 allocs/op
-BenchmarkNew/Slicetree,_Put,_keys:_[4900]-10                                2035            498164 ns/op          417840 B/op          5 allocs/op
-BenchmarkNew/CenterTree,_Put,_keys:_[4900]-10                              14793             80956 ns/op          237664 B/op          3 allocs/op
-BenchmarkNew/Native_map,_Get,_keys:_[4900]-10                                806           1450767 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree,_Get,_keys:_[4900]-10                                2263            495650 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_,_Get,_keys:_[4900]-10                              2340            498676 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map,_Count_between,_keys:_[4900]-10                        4         274503427 ns/op           75738 B/op       9545 allocs/op
-BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[4900]-10                 1282            905400 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[4900]-10                1281            896108 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[1600]-10                                 22788             52527 ns/op           93056 B/op       1606 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[1600]-10                                  8947            121481 ns/op           90160 B/op          4 allocs/op
+BenchmarkNew/CenterTree,_Put,_keys:_[1600]-10                                49328             24619 ns/op           82016 B/op          3 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[1600]-10                                10000            108199 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[1600]-10                                  7966            150501 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_,_Get,_keys:_[1600]-10                                7321            152516 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[1600]-10                         64          17650692 ns/op           22550 B/op       2944 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[1600]-10                   4399            273120 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[1600]-10                  4406            274492 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[2500]-10                                 15567             77685 ns/op          169264 B/op       2510 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[2500]-10                                  5505            197154 ns/op          155696 B/op          4 allocs/op
+BenchmarkNew/CenterTree,_Put,_keys:_[2500]-10                                28598             41466 ns/op          122976 B/op          3 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[2500]-10                                 5166            204630 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[2500]-10                                  5078            229907 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_,_Get,_keys:_[2500]-10                                5084            232709 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[2500]-10                         26          42240584 ns/op           36982 B/op       4744 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[2500]-10                   2780            422824 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[2500]-10                  2833            434941 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[3600]-10                                  9367            124997 ns/op          304880 B/op       3618 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[3600]-10                                  3429            308869 ns/op          204848 B/op          4 allocs/op
+BenchmarkNew/CenterTree,_Put,_keys:_[3600]-10                                21578             55250 ns/op          180320 B/op          3 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[3600]-10                                 2738            391329 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[3600]-10                                  3268            348179 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_,_Get,_keys:_[3600]-10                                3428            344963 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[3600]-10                          9         121407124 ns/op           54710 B/op       6944 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[3600]-10                   1820            628382 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[3600]-10                  1905            628054 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put,_keys:_[4900]-10                                  7759            152756 ns/op          336080 B/op       4918 allocs/op
+BenchmarkNew/Slicetree,_Put,_keys:_[4900]-10                                  2035            498164 ns/op          417840 B/op          5 allocs/op
+BenchmarkNew/CenterTree,_Put,_keys:_[4900]-10                                14793             80956 ns/op          237664 B/op          3 allocs/op
+BenchmarkNew/Native_map,_Get,_keys:_[4900]-10                                  806           1450767 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree,_Get,_keys:_[4900]-10                                  2263            495650 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_,_Get,_keys:_[4900]-10                                2340            498676 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map,_Count_between,_keys:_[4900]-10                          4         274503427 ns/op           75738 B/op       9545 allocs/op
+BenchmarkNew/SliceTree,_Count_Between_nodes_keys:_[4900]-10                   1282            905400 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree,_Count_Between_nodes_keys:_[4900]-10                  1281            896108 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Put_key_count:_100-32                    1000000000               0.0000011 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Put_key_count:_100-32            1000000000               0.0000054 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Put_key_count:_100-32             1000000000               0.0000026 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Get_key_count:_100-32                    1000000000               0.0000009 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Get_key_count:_100-32            1000000000               0.0000029 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Get_key_count:_100-32             1000000000               0.0000035 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Put_key_count:_1000-32                   1000000000               0.0000059 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Put_key_count:_1000-32           1000000000               0.0000419 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Put_key_count:_1000-32            1000000000               0.0000418 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Get_key_count:_1000-32                   1000000000               0.0000058 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Get_key_count:_1000-32           1000000000               0.0000576 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Get_key_count:_1000-32            1000000000               0.0000621 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Put_key_count:_10000-32                  1000000000               0.0000630 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Put_key_count:_10000-32          1000000000               0.0005192 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Put_key_count:_10000-32           1000000000               0.0005287 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint64_Get_key_count:_10000-32                  1000000000               0.0000511 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint64_int_Get_key_count:_10000-32          1000000000               0.0004885 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint64_int_Get_key_count:_10000-32           1000000000               0.0004839 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Put_key_count:_10-32                      1000000000               0.0000007 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Put_key_count:_10-32              1000000000               0.0000009 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Put_key_count:_10-32               1000000000               0.0000008 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Get_key_count:_10-32                      1000000000               0.0000006 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Get_key_count:_10-32              1000000000               0.0000007 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Get_key_count:_10-32               1000000000               0.0000008 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Put_key_count:_100-32                     1000000000               0.0000022 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Put_key_count:_100-32             1000000000               0.0000033 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Put_key_count:_100-32              1000000000               0.0000038 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Get_key_count:_100-32                     1000000000               0.0000020 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Get_key_count:_100-32             1000000000               0.0000040 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Get_key_count:_100-32              1000000000               0.0000027 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Put_key_count:_255-32                     1000000000               0.0000053 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Put_key_count:_255-32             1000000000               0.0000085 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Put_key_count:_255-32              1000000000               0.0000071 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_Map_Uint8_Get_key_count:_255-32                     1000000000               0.0000047 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Map_Uint8_int_Get_key_count:_255-32             1000000000               0.0000088 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Map_Uint8_int_Get_key_count:_255-32              1000000000               0.0000061 ns/op               0 B/op          0 allocs/op
 ```
 
 __How to read the benchmark__
@@ -296,7 +332,7 @@ So when does omap.Slicetree actually become faster?
 
 Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
   - Yes on range scans
-  - On Writes, On append or prepend omap.CenterTree is always faster
+  - On Writes for strings, On append or prepend omap.CenterTree is always faster
   - On Read, never on a16 bit number
   - On Read after: the first 16 bits cause a collision and ternary logic is faster operating on the entire integer or float value
 

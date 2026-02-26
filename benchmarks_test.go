@@ -168,4 +168,121 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 	}
+
+	for _, size := range []uint64{100, 1000, 10000} {
+
+		m := make(map[uint64]any, size)
+		b.Run(
+			fmt.Sprintf("Native Map Uint64 Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					m[uint64(k)] = nil
+				}
+
+			},
+		)
+		ct := NewCenterTree[uint64, any](int(size), cmp.Compare)
+		b.Run(
+			fmt.Sprintf("CenterTree Map Uint64 int Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					ct.Put(k, nil)
+				}
+
+			},
+		)
+		st := NewSliceTree[uint64, any](int(size), cmp.Compare)
+		b.Run(
+			fmt.Sprintf("SliceTree Map Uint64 int Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					//k <<= 16
+					st.Put(k, nil)
+				}
+
+			},
+		)
+		b.Run(
+			fmt.Sprintf("Native Map Uint64 Get key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					_, _ = m[uint64(k)]
+				}
+
+			},
+		)
+		sets := []OrderedMap[uint64, any]{ct, st}
+		names := []string{"CenterTree", "SliceTree"}
+		for idx := range 2 {
+			s := sets[idx]
+			b.Run(
+				fmt.Sprintf("%s Map Uint64 int Get key count: %d", names[idx], size),
+				func(b *testing.B) {
+					for k := range size {
+						//k <<= 16
+						s.Get(k)
+					}
+
+				},
+			)
+		}
+	}
+	for _, size := range []uint8{10, 100, 255} {
+
+		m := make(map[uint8]any, size)
+		b.Run(
+			fmt.Sprintf("Native Map Uint8 Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					m[uint8(k)] = nil
+				}
+
+			},
+		)
+		ct := NewCenterTree[uint8, any](int(size), cmp.Compare)
+		b.Run(
+			fmt.Sprintf("CenterTree Map Uint8 int Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					ct.Put(k, nil)
+				}
+
+			},
+		)
+		st := NewSliceTree[uint8, any](int(size), cmp.Compare)
+		b.Run(
+			fmt.Sprintf("SliceTree Map Uint8 int Put key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					//k <<= 16
+					st.Put(k, nil)
+				}
+
+			},
+		)
+		b.Run(
+			fmt.Sprintf("Native Map Uint8 Get key count: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					_, _ = m[uint8(k)]
+				}
+
+			},
+		)
+		sets := []OrderedMap[uint8, any]{ct, st}
+		names := []string{"CenterTree", "SliceTree"}
+		for idx := range 2 {
+			s := sets[idx]
+			b.Run(
+				fmt.Sprintf("%s Map Uint8 int Get key count: %d", names[idx], size),
+				func(b *testing.B) {
+					for k := range size {
+						//k <<= 16
+						s.Get(k)
+					}
+
+				},
+			)
+		}
+	}
 }
