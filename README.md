@@ -17,10 +17,21 @@ Performance objectives while maintinaing a sorted map:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
+Note:
+
+__On Read For strings__:
+  - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
+  - Large number of keys: omap.CenterTree and omap.SliceTree are o(log n) faster than go's internal map
+
+__On Write for strings__:
+  - Best Case, omap.CenterTree twice as fast on write over go's internal map
+  - Worst case, omap.CenterTree is half as fast on write as go's internal map 
+
 ## When Should you use omap.CenterTree in place of a map?
 
 Any one of these is a practical use case:
-  - An sorted map is required
+  - You need something that can find values based on strings strings faster than go's internal map
+  - A sorted map is required
   - Memory constrained systems
   - Fuzzy logic is required, IE the ability to find points in between keys
   - When a combination of freequent updates and searching by ranges is requried
