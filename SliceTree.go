@@ -287,16 +287,6 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 	}
 }
 
-func idxResolved[K any, V any](k K, index, offset, mid int, Cmp func(a, b K) int, Slices []KvSet[K, V]) (idx, os int) {
-
-	index = offset + mid
-	if index < 0 {
-		return mid, offset
-	}
-	offset = Cmp(k, Slices[index].Key)
-	return
-}
-
 // Returns an iterator for the current keys.
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
