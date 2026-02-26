@@ -17,7 +17,7 @@ Performance objectives while maintinaing a sorted map:
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
 
-Note:
+# Performance Matters
 
 __On Read For strings__:
   - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
