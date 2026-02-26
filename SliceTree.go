@@ -268,9 +268,6 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 				break
 			} else {
 				mid = begin + getMid(diff+1)
-				if offset == 0 {
-					break
-				}
 			}
 		}
 	}
