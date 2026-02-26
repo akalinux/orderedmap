@@ -32,7 +32,7 @@ func BenchmarkNew(b *testing.B) {
 		}
 		var m map[string]*KvSet[*string, any]
 		b.Run(
-			fmt.Sprintf("Native map Put, keys: [%d]", bs),
+			fmt.Sprintf("Native map Put keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					m = make(map[string]*KvSet[*string, any], bs)
@@ -56,7 +56,7 @@ func BenchmarkNew(b *testing.B) {
 
 		var s *SliceTree[*string, any]
 		b.Run(
-			fmt.Sprintf("Slicetree, Put, keys: [%d]", bs),
+			fmt.Sprintf("Slicetree Put keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 
@@ -73,7 +73,7 @@ func BenchmarkNew(b *testing.B) {
 		}
 		var ct *CenterTree[*string, any]
 		b.Run(
-			fmt.Sprintf("CenterTree, Put, keys: [%d]", bs),
+			fmt.Sprintf("CenterTree Put keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 
@@ -89,7 +89,7 @@ func BenchmarkNew(b *testing.B) {
 			b.Fatalf("Go map should contain: %d elements, got: %d", bs, ct.Size())
 		}
 		b.Run(
-			fmt.Sprintf("Native map, Get, keys: [%d]", bs),
+			fmt.Sprintf("Native map Get keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					for i := range bs {
@@ -99,7 +99,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("SliceTree, Get, keys: [%d]", bs),
+			fmt.Sprintf("SliceTree Get keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					for i := range bs {
@@ -109,7 +109,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("CenterTree , Get, keys: [%d]", bs),
+			fmt.Sprintf("CenterTree Get keys: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					for i := range bs {
@@ -119,7 +119,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("Native map, Count between, keys: [%d]", bs),
+			fmt.Sprintf("Native map Count between: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					count := 0
@@ -138,7 +138,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("SliceTree, Count Between nodes keys: [%d]", bs),
+			fmt.Sprintf("SliceTree Count Between: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					count := 0
@@ -153,7 +153,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("CenterTree, Count Between nodes keys: [%d]", bs),
+			fmt.Sprintf("CenterTree Count Between: [%d]", bs),
 			func(b *testing.B) {
 				for range b.N {
 					count := 0
@@ -173,7 +173,7 @@ func BenchmarkNew(b *testing.B) {
 
 		m := make(map[uint64]any, size)
 		b.Run(
-			fmt.Sprintf("Native Map Uint64 Put key count: %d", size),
+			fmt.Sprintf("Native Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					m[uint64(k)] = nil
@@ -183,7 +183,7 @@ func BenchmarkNew(b *testing.B) {
 		)
 		ct := NewCenterTree[uint64, any](int(size), cmp.Compare)
 		b.Run(
-			fmt.Sprintf("CenterTree Map Uint64 int Put key count: %d", size),
+			fmt.Sprintf("CenterTree Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					ct.Put(k, nil)
@@ -193,7 +193,7 @@ func BenchmarkNew(b *testing.B) {
 		)
 		st := NewSliceTree[uint64, any](int(size), cmp.Compare)
 		b.Run(
-			fmt.Sprintf("SliceTree Map Uint64 int Put key count: %d", size),
+			fmt.Sprintf("SliceTree Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					//k <<= 16
@@ -203,7 +203,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("Native Map Uint64 Get key count: %d", size),
+			fmt.Sprintf("Native Map Uint64 Get keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					_, _ = m[uint64(k)]
@@ -216,7 +216,7 @@ func BenchmarkNew(b *testing.B) {
 		for idx := range 2 {
 			s := sets[idx]
 			b.Run(
-				fmt.Sprintf("%s Map Uint64 int Get key count: %d", names[idx], size),
+				fmt.Sprintf("%s Map Uint64 int Get keys: %d", names[idx], size),
 				func(b *testing.B) {
 					for k := range size {
 						//k <<= 16
@@ -231,7 +231,7 @@ func BenchmarkNew(b *testing.B) {
 
 		m := make(map[uint8]any, size)
 		b.Run(
-			fmt.Sprintf("Native Map Uint8 Put key count: %d", size),
+			fmt.Sprintf("Native Map Uint8 Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					m[uint8(k)] = nil
@@ -241,7 +241,7 @@ func BenchmarkNew(b *testing.B) {
 		)
 		ct := NewCenterTree[uint8, any](int(size), cmp.Compare)
 		b.Run(
-			fmt.Sprintf("CenterTree Map Uint8 int Put key count: %d", size),
+			fmt.Sprintf("CenterTree Map Uint8 int Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					ct.Put(k, nil)
@@ -251,7 +251,7 @@ func BenchmarkNew(b *testing.B) {
 		)
 		st := NewSliceTree[uint8, any](int(size), cmp.Compare)
 		b.Run(
-			fmt.Sprintf("SliceTree Map Uint8 int Put key count: %d", size),
+			fmt.Sprintf("SliceTree Map Uint8 int Put keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					//k <<= 16
@@ -261,7 +261,7 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		b.Run(
-			fmt.Sprintf("Native Map Uint8 Get key count: %d", size),
+			fmt.Sprintf("Native Map Uint8 Get keys: %d", size),
 			func(b *testing.B) {
 				for k := range size {
 					_, _ = m[uint8(k)]
@@ -274,7 +274,7 @@ func BenchmarkNew(b *testing.B) {
 		for idx := range 2 {
 			s := sets[idx]
 			b.Run(
-				fmt.Sprintf("%s Map Uint8 int Get key count: %d", names[idx], size),
+				fmt.Sprintf("%s Map Uint8 int Get keys: %d", names[idx], size),
 				func(b *testing.B) {
 					for k := range size {
 						//k <<= 16
