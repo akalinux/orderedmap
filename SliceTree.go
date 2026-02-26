@@ -241,7 +241,6 @@ func (s *SliceTree[K, V]) grow(size int) {
 //
 // Complexity: o(log n)
 func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {
-
 	end := len(Slices)
 	switch end {
 	case 0:
@@ -252,14 +251,11 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 	mid := getMid(end)
 	end--
 	begin := 0
-	var resolved bool
 	var diff int
 	for {
 		offset = Cmp(k, Slices[mid].Key)
-		// A switch statement is not optimal!
-
 		if offset == 0 {
-			resolved = true
+			break
 		} else {
 			if offset == -1 {
 				end = mid - 1
@@ -268,22 +264,21 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 			}
 			diff = end - begin
 			if diff <= 0 {
-				resolved = true
+				break
 			} else {
 				mid = begin + getMid(diff+1)
-				resolved = offset == 0
+				if offset == 0 {
+					break
+				}
 			}
-		}
-
-		if resolved {
-			index = offset + mid
-			if index < 0 {
-				return mid, offset
-			}
-			offset = Cmp(k, Slices[index].Key)
-			return
 		}
 	}
+	index = offset + mid
+	if index < 0 {
+		return mid, offset
+	}
+	offset = Cmp(k, Slices[index].Key)
+	return
 }
 
 // Returns an iterator for the current keys.
