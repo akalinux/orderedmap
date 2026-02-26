@@ -21,7 +21,7 @@ Performance objectives while maintinaing a sorted map:
 
 __On Read For strings__:
   - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
-  - Large number of keys: omap.CenterTree and omap.SliceTree get o(log n) faster as the number of keys grow
+  - Large number of keys: omap.CenterTree and omap.SliceTree is o(log n) faster than go's internal map
 
 __On Write for strings__:
   - Best Case, omap.CenterTree twice as fast on write over go's internal map
