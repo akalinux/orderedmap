@@ -186,18 +186,18 @@ The following holds true for these benchmarks
 
 __How well does omap compare native map feature in go?:__
 ```
-BenchmarkNew/Native_map_Put_keys:_[1600]-10                            26880                 44712 ns/op           93056 B/op       1606 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[1600]-10                             17678                 67354 ns/op           41008 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[1600]-10                            45187                 26866 ns/op           82016 B/op          3 allocs/op
-BenchmarkNew/Native_map_Get_keys:_[1600]-10                            10000                108296 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Get_keys:_[1600]-10                             10000                106291 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Get_keys:_[1600]-10                            10000                105921 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Count_between:_[1600]-10                          61              17819665 ns/op           22554 B/op       2944 allocs/op
-BenchmarkNew/SliceTree_Count_Between:_[1600]-10                         6261                193573 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Count_Between:_[1600]-10                        6258                191440 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put_keys:_[2500]-10                            15428                 77313 ns/op          169264 B/op       2510 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[2500]-10                              9609                116953 ns/op           65584 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[2500]-10                            27031                 44275 ns/op          122976 B/op          3 allocs/op
+BenchmarkNew/Native_map_Put_keys:_[1600]-10                           26880                  44712 ns/op           93056 B/op       1606 allocs/op
+BenchmarkNew/Slicetree_Put_keys:_[1600]-10                            17678                  67354 ns/op           41008 B/op          2 allocs/op
+BenchmarkNew/CenterTree_Put_keys:_[1600]-10                           45187                  26866 ns/op           82016 B/op          3 allocs/op
+BenchmarkNew/Native_map_Get_keys:_[1600]-10                           10000                 108296 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/SliceTree_Get_keys:_[1600]-10                            10000                 106291 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Get_keys:_[1600]-10                           10000                 105921 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Count_between:_[1600]-10                         61               17819665 ns/op           22554 B/op       2944 allocs/op
+BenchmarkNew/SliceTree_Count_Between:_[1600]-10                        6261                 193573 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/CenterTree_Count_Between:_[1600]-10                       6258                 191440 ns/op               0 B/op          0 allocs/op
+BenchmarkNew/Native_map_Put_keys:_[2500]-10                           15428                  77313 ns/op          169264 B/op       2510 allocs/op
+BenchmarkNew/Slicetree_Put_keys:_[2500]-10                             9609                 116953 ns/op           65584 B/op          2 allocs/op
+BenchmarkNew/CenterTree_Put_keys:_[2500]-10                           27031                  44275 ns/op          122976 B/op          3 allocs/op
 BenchmarkNew/Native_map_Get_keys:_[2500]-10                            5223                 211555 ns/op               0 B/op          0 allocs/op
 BenchmarkNew/SliceTree_Get_keys:_[2500]-10                             6735                 167211 ns/op               0 B/op          0 allocs/op
 BenchmarkNew/CenterTree_Get_keys:_[2500]-10                            7146                 163492 ns/op               0 B/op          0 allocs/op
