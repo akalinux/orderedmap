@@ -292,7 +292,7 @@ On write:
 
 On read:
   - Go map map is faster when it comes to integers on both read and write
-  - omap.SliceTree and omap.CenterTree are faster when it comes to stings
+  - omap.SliceTree and omap.CenterTree are faster when it comes to strings
 
 Where the native map in go always perfoms worse is in memory usage:
   - Go map uses about 45%-70% more memory than omap.SliceTree or omap.CenterTree.
