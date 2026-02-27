@@ -258,3 +258,21 @@ func (s *CenterTree[K, V]) clearBetween(a, b K, cb func(x, y, t int, ok bool), o
 		s.Slices = s.CenteredSlice[s.Begin : s.End+1]
 	}
 }
+
+// Deletes all elements that return true
+func (s *CenterTree[K, V]) Filter(cb func(K, V) bool) {
+	ns := make([]KvSet[K, V], cap(s.CenteredSlice))
+	total := 0
+	for k, v := range s.All() {
+		if !cb(k, v) {
+			ns[s.Begin+total] = KvSet[K, V]{k, v}
+			total++
+		}
+	}
+	if total == 0 {
+		s.RemoveAll()
+		return
+	}
+	s.End = s.Begin + total
+	s.Slices = s.CenteredSlice[s.Begin:s.End]
+}

@@ -653,3 +653,15 @@ func ToMap[K comparable, V any](src OrderedMap[K, V]) map[K]V {
 	}
 	return m
 }
+
+// Filter implements [OrderedMap]
+// The cost is o(1), and simply creates a new internal slice.
+func (s *SliceTree[K, V]) Filter(cb func(K, V) bool) {
+	ns := make([]KvSet[K, V], 0, s.Size())
+	for k, v := range s.All() {
+		if !cb(k, v) {
+			ns = append(ns, KvSet[K, V]{k, v})
+		}
+	}
+	s.Slices = ns
+}

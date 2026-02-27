@@ -1,5 +1,5 @@
 # OMAP a Sort Ordered map
-The fastests sorted map for cache deprication.
+The fastests sorted map possible for caching, time-series, and scheduling.
 
 The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. 2x faster for time-series and sequential data.  The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.  Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.  An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
 
@@ -148,6 +148,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | Contains | key K | bool | true if the key is between both the FirstKey and LastKey |
 | Put | key K, value V | int | Sets the key and value pair |
 | Get | key K | value V, ok bool | Returned the value for the key if ok is true|
+| Filter | func(k K,v V) bool |  | deletes the given element when the callback returns true |
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
 | RemoveAll | | int | Clears all elements and returns how many elements were removed |
 | MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |

@@ -1,4 +1,4 @@
-// Yet another sorted map in go.. but not really.
+// The fastests sorted map possible for caching, time-series, and scheduling.
 //
 // The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go.
 // Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices.
