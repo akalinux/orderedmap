@@ -104,13 +104,13 @@ func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 func (s *CenterTree[K, V]) Put(k K, v V) {
 	Slices := s.Slices
 	size := len(Slices)
-	limit := cap(s.CenteredSlice) - 1
 	if size == 0 {
 		s.CenteredSlice[s.Begin] = KvSet[K, V]{k, v}
 		s.Slices = s.CenteredSlice[s.Begin : s.Begin+1]
 		return
 	}
 
+	limit := cap(s.CenteredSlice) - 1
 	var idx int
 	var offset int
 	Cmp := s.Cmp
@@ -169,7 +169,6 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				s.CenteredSlice = s.CenteredSlice[0:cap(s.CenteredSlice)]
 				copy(s.CenteredSlice[pos+1:end+1], Slices[idx+1:size])
 				s.End = end
-				pos = s.Begin + idx + 1
 			}
 
 		} else {
