@@ -169,6 +169,10 @@ func BenchmarkNew(b *testing.B) {
 		)
 	}
 
+	names := []string{
+		"SliceTree",
+		"CenterTree",
+	}
 	for _, size := range []uint64{100, 1000, 10000} {
 
 		var m map[uint64]any
@@ -178,6 +182,18 @@ func BenchmarkNew(b *testing.B) {
 				m = make(map[uint64]any, size)
 				for k := range size {
 					m[uint64(k)] = nil
+				}
+
+			},
+		)
+
+		var st OrderedMap[uint64, any]
+		b.Run(
+			fmt.Sprintf("SliceTree Map Uint64 Put keys: %d", size),
+			func(b *testing.B) {
+				st = NewSliceTree[uint64, any](int(size), cmp.Compare)
+				for k := range size {
+					st.Put(k, nil)
 				}
 
 			},
@@ -193,17 +209,6 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
-		var st OrderedMap[uint64, any]
-		b.Run(
-			fmt.Sprintf("SliceTree Map Uint64 Put keys: %d", size),
-			func(b *testing.B) {
-				st = NewSliceTree[uint64, any](int(size), cmp.Compare)
-				for k := range size {
-					st.Put(k, nil)
-				}
-
-			},
-		)
 		b.Run(
 			fmt.Sprintf("Native Map Uint64 Get keys: %d", size),
 			func(b *testing.B) {
@@ -213,8 +218,7 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
-		sets := []OrderedMap[uint64, any]{ct, st}
-		names := []string{"CenterTree", "SliceTree"}
+		sets := []OrderedMap[uint64, any]{st, ct}
 		for idx := range 2 {
 			s := sets[idx]
 			b.Run(
@@ -241,16 +245,6 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
-		ct := NewCenterTree[uint8, any](int(size), cmp.Compare)
-		b.Run(
-			fmt.Sprintf("CenterTree Map Uint8 int Put keys: %d", size),
-			func(b *testing.B) {
-				for k := range size {
-					ct.Put(k, nil)
-				}
-
-			},
-		)
 		st := NewSliceTree[uint8, any](int(size), cmp.Compare)
 		b.Run(
 			fmt.Sprintf("SliceTree Map Uint8 int Put keys: %d", size),
@@ -262,6 +256,17 @@ func BenchmarkNew(b *testing.B) {
 
 			},
 		)
+		ct := NewCenterTree[uint8, any](int(size), cmp.Compare)
+		b.Run(
+			fmt.Sprintf("CenterTree Map Uint8 int Put keys: %d", size),
+			func(b *testing.B) {
+				for k := range size {
+					ct.Put(k, nil)
+				}
+
+			},
+		)
+
 		b.Run(
 			fmt.Sprintf("Native Map Uint8 Get keys: %d", size),
 			func(b *testing.B) {
@@ -272,7 +277,6 @@ func BenchmarkNew(b *testing.B) {
 			},
 		)
 		sets := []OrderedMap[uint8, any]{ct, st}
-		names := []string{"CenterTree", "SliceTree"}
 		for idx := range 2 {
 			s := sets[idx]
 			b.Run(
