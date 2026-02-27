@@ -128,7 +128,6 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				idx, offset = GetIndex(k, Cmp, Slices[1:mid])
 				idx++
 			default:
-
 				idx, offset = GetIndex(k, Cmp, Slices[mid+1:size-1])
 				idx += mid + 1
 			}
@@ -138,7 +137,6 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 	}
 	var pos int
 	switch offset {
-
 	case -1:
 		begin := s.Begin - 1
 		if begin >= 0 {
@@ -154,7 +152,6 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 				end := s.Growth + s.End
 				begin := s.Growth - 1
 				copy(ns[begin:idx+begin], Slices[0:idx])
-
 				copy(ns[begin+idx+1:end+1], Slices[idx:])
 				s.CenteredSlice = ns
 				s.Begin = begin
