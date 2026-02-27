@@ -60,7 +60,7 @@ func BenchmarkNew(b *testing.B) {
 			func(b *testing.B) {
 				for range b.N {
 
-					s = NewSliceTree[*string, any](bs>>1, Cmp)
+					s = NewSliceTree[*string, any](bs, Cmp)
 					for i := range bs {
 						s.Put(keys[i], nil)
 					}
@@ -171,32 +171,34 @@ func BenchmarkNew(b *testing.B) {
 
 	for _, size := range []uint64{100, 1000, 10000} {
 
-		m := make(map[uint64]any, size)
+		var m map[uint64]any
 		b.Run(
 			fmt.Sprintf("Native Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
+				m = make(map[uint64]any, size)
 				for k := range size {
 					m[uint64(k)] = nil
 				}
 
 			},
 		)
-		ct := NewCenterTree[uint64, any](int(size), cmp.Compare)
+		var ct OrderedMap[uint64, any]
 		b.Run(
 			fmt.Sprintf("CenterTree Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
+				ct = NewCenterTree[uint64, any](int(size), cmp.Compare)
 				for k := range size {
 					ct.Put(k, nil)
 				}
 
 			},
 		)
-		st := NewSliceTree[uint64, any](int(size), cmp.Compare)
+		var st OrderedMap[uint64, any]
 		b.Run(
 			fmt.Sprintf("SliceTree Map Uint64 Put keys: %d", size),
 			func(b *testing.B) {
+				st = NewSliceTree[uint64, any](int(size), cmp.Compare)
 				for k := range size {
-					//k <<= 16
 					st.Put(k, nil)
 				}
 
