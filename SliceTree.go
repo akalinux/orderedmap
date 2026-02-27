@@ -26,14 +26,11 @@ type SliceTree[K any, V any] struct {
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
 	return &SliceTree[K, V]{
-		Slices:      make([]KvSet[K, V], 0, size),
-		Cmp:         cb,
-		Growth:      100,
-		OnOverWrite: overwriteStub[K, V],
+		Slices: make([]KvSet[K, V], 0, size),
+		Cmp:    cb,
+		Growth: 100,
 	}
 }
-
-func overwriteStub[K any, V any](key K, oldValue, newValue V) {}
 
 // Creates a new SliceTee with the default Slices size of 100.  If you require more control over the starting size of the slice
 // use the NewSliceTree function in stead.
@@ -202,7 +199,9 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 			s.Slices[idx] = KvSet[K, V]{k, v}
 		} else {
 			// overwrite
-			s.OnOverWrite(k, s.Slices[idx].Value, v)
+			if s.OnOverWrite != nil {
+				s.OnOverWrite(k, s.Slices[idx].Value, v)
+			}
 			s.Slices[idx].Value = v
 		}
 

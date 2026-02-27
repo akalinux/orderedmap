@@ -28,8 +28,7 @@ func NewCenterTree[K any, V any](growth int, cmp func(a, b K) int) *CenterTree[K
 			Cmp:    cmp,
 			Growth: growth,
 			// pass an empty slice
-			Slices:      slices[:0],
-			OnOverWrite: overwriteStub[K, V],
+			Slices: slices[:0],
 		},
 		Begin:         begin,
 		End:           begin,
@@ -182,7 +181,9 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 			s.End = end
 		}
 	case 0:
-		s.OnOverWrite(k, Slices[idx].Value, v)
+		if s.OnOverWrite != nil {
+			s.OnOverWrite(k, Slices[idx].Value, v)
+		}
 		s.Slices[idx].Value = v
 		return
 	}
