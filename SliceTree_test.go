@@ -821,7 +821,7 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 }
 
 func TestOperationalSetters(t *testing.T) {
-	s := &SliceTree[int, int]{Cmp: cmp.Compare[int]}
+	s := &SliceTree[int, int]{Cmp: cmp.Compare[int], OnOverWrite: overwriteStub[int, int]}
 	s.Put(0, 1)
 
 	// force default fallback growth

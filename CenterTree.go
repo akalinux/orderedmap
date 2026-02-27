@@ -28,7 +28,8 @@ func NewCenterTree[K any, V any](growth int, cmp func(a, b K) int) *CenterTree[K
 			Cmp:    cmp,
 			Growth: growth,
 			// pass an empty slice
-			Slices: slices[:0],
+			Slices:      slices[:0],
+			OnOverWrite: overwriteStub[K, V],
 		},
 		Begin:         begin,
 		End:           begin,

@@ -26,11 +26,14 @@ type SliceTree[K any, V any] struct {
 // Creatss a new SliceTree with the internal Slice set to "size".
 func NewSliceTree[K any, V any](size int, cb func(a, b K) int) *SliceTree[K, V] {
 	return &SliceTree[K, V]{
-		Slices: make([]KvSet[K, V], 0, size),
-		Cmp:    cb,
-		Growth: 100,
+		Slices:      make([]KvSet[K, V], 0, size),
+		Cmp:         cb,
+		Growth:      100,
+		OnOverWrite: overwriteStub[K, V],
 	}
 }
+
+func overwriteStub[K any, V any](key K, oldValue, newValue V) {}
 
 // Creates a new SliceTee with the default Slices size of 100.  If you require more control over the starting size of the slice
 // use the NewSliceTree function in stead.
@@ -176,29 +179,18 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 	if offset != 0 {
 		ns := size + 1
 		s.grow(ns)
-		kv := KvSet[K, V]{k, v}
 		s.Slices = s.Slices[:ns]
+		os := (offset + 1) >> 1
 		switch idx {
 		case 0:
-			if offset == 1 {
-				copy(s.Slices[2:], s.Slices[1:size])
-				s.Slices[1] = kv
-				return 1
-			} else {
-				copy(s.Slices[1:], s.Slices[0:size])
-				s.Slices[0] = kv
-			}
-			return 0
+			copy(s.Slices[1+os:], s.Slices[os:size])
+			s.Slices[os] = KvSet[K, V]{k, v}
+			return os
 		default:
-			index = idx + offset
+			index = idx + os
 			copy(s.Slices[index+1:], s.Slices[index:size])
-			if offset < 0 {
-				s.Slices[idx] = kv
-				return idx
-			} else {
-				s.Slices[index] = kv
-				return index
-			}
+			s.Slices[index] = KvSet[K, V]{k, v}
+			return
 
 		}
 	} else {
@@ -210,9 +202,7 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 			s.Slices[idx] = KvSet[K, V]{k, v}
 		} else {
 			// overwrite
-			if s.OnOverWrite != nil {
-				s.OnOverWrite(k, s.Slices[idx].Value, v)
-			}
+			s.OnOverWrite(k, s.Slices[idx].Value, v)
 			s.Slices[idx].Value = v
 		}
 
