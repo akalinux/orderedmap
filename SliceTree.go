@@ -188,7 +188,6 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 			copy(s.Slices[index+1:], s.Slices[index:size])
 			s.Slices[index] = KvSet[K, V]{k, v}
 			return
-
 		}
 	} else {
 		ns := idx + 1
