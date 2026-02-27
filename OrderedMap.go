@@ -102,6 +102,6 @@ type OrderedMap[K any, V any] interface {
 	// If the instance is all ready thread safe, then the current instance is returned.
 	ToTs() OrderedMap[K, V]
 
-	// Deletes all elements that return true
+	// Deletes the given element when the callback returns true
 	Filter(func(k K, v V) bool)
 }
