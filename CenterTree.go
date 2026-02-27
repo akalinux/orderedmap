@@ -182,9 +182,7 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 			s.End = end
 		}
 	case 0:
-		if s.OnOverWrite != nil {
-			s.OnOverWrite(k, Slices[idx].Value, v)
-		}
+		s.OnOverWrite(k, Slices[idx].Value, v)
 		s.Slices[idx].Value = v
 		return
 	}
