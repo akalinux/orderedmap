@@ -1,7 +1,7 @@
 # OMAP a Sorted sorted map
 Yet another sorted map in go.. but not really.
 
-The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. 2x faster for time-series and sequential data.  The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine..  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.  Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.  An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
+The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. 2x faster for time-series and sequential data.  The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.  Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.  An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
 
 Unlike tree-based maps, omap.SliceTree and omap.CenterTree range searches use direct slice referencing, avoiding tree traversal entirely.
 This is in general the optimized solution for caching, and time-series maps.
@@ -16,6 +16,17 @@ Performance objectives while maintinaing a sorted map:
   - Finding elements: at, before, or after a given point is always a fixed cost of o(log n)
   - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
   - Pre-emptive but predictable growth, this is done by setting the Growth size.
+  - omap.SliceTree and omap.CenterTree support tunable pre-allocation
+
+__omap.SliceTree__: 
+  - Implements pre-allocated a sorted slice, the elements are sequential and start at 0
+  - This offers the fastest possible search speed, along with the fast bulk element deletion.
+
+__omap.CenterTree__
+  - Implements pre-allocated a sorted slice, the elements are sequential and start at the center of the slice.
+  - This offers fast search speed, along with the fastest possible range based bulk element deletion.
+  - Insertion to the beginning or end of the array are done using pre-allocated memory and are o(1)
+
 
 __On Read For strings__:
   - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
