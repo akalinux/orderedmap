@@ -96,3 +96,5 @@ v1.1.39
   - Since the commit logs not very insightful: ChangeLog.md has been added!
   - Documentation updates
   - added method GetBetweenKvSlice
+v1.1.40
+  - added link in README.md to external benchmarks

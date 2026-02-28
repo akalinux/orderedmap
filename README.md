@@ -189,6 +189,8 @@ Returns all values up to "Tomorrow".
 
 ## Benchmarks
 
+If you want to see other benchmarks like comparing google's btree click [here](https://github.com/akalinux/benchmarksortedmaps)
+
 So benchmarks are always very subjective, but the real question is: what do we compare omap too?  The only real answer is the native map in go.
 Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to faster.
 
