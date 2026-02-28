@@ -150,7 +150,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | Get | key K | value V, ok bool | Returned the value for the key if ok is true|
 | GetKvSlice |  | []KvSet[K,V] | Returns the current internal slice used for read operations |
 | Filter | func(k K,v V) bool |  | deletes the given element when the callback returns true |
-| FilterBetween | cb func(k K, v V) bool,a,b K, opt ...int |  | likr filter, but only runs between a and b, for options [See](#between-options) |
+| FilterBetween | cb func(k K, v V) bool,a,b K, opt ...int |  | like filter, but only runs between a and b, for options [See](#between-options) |
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
 | RemoveAll | | int | Clears all elements and returns how many elements were removed |
 | MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |
