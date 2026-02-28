@@ -114,4 +114,7 @@ type OrderedMap[K any, V any] interface {
 	// Fast merge operation always o(1).
 	// This requires both this instance and the set are in the same order.
 	FastMerge(set OrderedMap[K, V]) int
+
+	// Returns a slice containing the keys and values between a and b
+	GetBetweenKvSlice(a, b K, opt ...int) []KvSet[K, V]
 }

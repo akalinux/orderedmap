@@ -53,6 +53,12 @@ func (s *ThreadSafeOrderedMap[K, V]) All() iter.Seq2[K, V] {
 	}
 }
 
+func (s *ThreadSafeOrderedMap[K, V]) GetBetweenKvSlice(a, b K, opt ...int) []KvSet[K, V] {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.Tree.GetBetweenKvSlice(a, b, opt...)
+}
+
 func (s *ThreadSafeOrderedMap[K, V]) FilterBetween(cb func(k K, v V) bool, a, b K, opt ...int) {
 	s.lock.Lock()
 	defer s.lock.Unlock()

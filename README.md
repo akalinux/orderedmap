@@ -160,6 +160,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | LastKey | | key K, ok bool | When ok is true the last key in the instance is returned |
 | Between | a,b K, opt ...int| total int | Returns the number of elements between a and b. For options  [See](#between-options) |
 | BetweenKV | a,b K, opt ...int|  iter.Seq2[K, V] | Returns an iterator that contains the key/value pairs between a and b. For options  [See](#between-options) |
+| GetBetweenKvSlice | a,b K, opt ...int| []KvSet[K,V] | Returns a slice containing elements between a and b. For options  [See](#between-options) |
 | RemoveBetween | a,b K, opt ...int| int | Returns the number of elements removed between a and b. For options  [See](#between-options) |
 | RemoveBetweenKV | a,b K, opt ...int|  iter.Seq2[K, V] | Returns an iterator that contains the key/value pairs that were moved from between a and b. For options  [See](#between-options) |
 | ThreadSafe | | bool | Returns true if this instance is thread safe |

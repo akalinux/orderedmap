@@ -554,6 +554,16 @@ func (s *SliceTree[K, V]) BetweenKV(a, b K, opt ...int) (seq iter.Seq2[K, V]) {
 
 }
 
+// Returns a slice containing the elements between a and b
+func (s *SliceTree[K, V]) GetBetweenKvSlice(a, b K, opt ...int) []KvSet[K, V] {
+	x, y, _, ok := s.betweenChecks(a, b, opt...)
+	if ok {
+		return s.Slices[x : y+1]
+	} else {
+		return []KvSet[K, V]{}
+	}
+}
+
 // RemoveBetween implements [OrderedMap]
 func (s *SliceTree[K, V]) RemoveBetween(a, b K, opt ...int) (total int) {
 	s.clearBetween(a, b, func(x, y, t int, res bool) {
