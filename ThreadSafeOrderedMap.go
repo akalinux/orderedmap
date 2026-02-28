@@ -15,14 +15,26 @@ type ThreadSafeOrderedMap[K any, V any] struct {
 func NewTs[K any, V any](Cmp func(a, b K) int) (Map OrderedMap[K, V]) {
 
 	Map = &ThreadSafeOrderedMap[K, V]{
-		Tree: New[K, V](Cmp),
+		Tree: NewCenterTree[K, V](50, Cmp),
 	}
 	return
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) GetKvSlice() []KvSet[K, V] {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.Tree.GetKvSlice()
 }
 
 // Always returns this instance.
 func (s *ThreadSafeOrderedMap[K, V]) ToTs() OrderedMap[K, V] {
 	return s
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) FastMerge(set OrderedMap[K, V]) int {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	return s.Tree.FastMerge(set)
 }
 
 // All implements [OrderedMap].
@@ -39,6 +51,12 @@ func (s *ThreadSafeOrderedMap[K, V]) All() iter.Seq2[K, V] {
 		}
 
 	}
+}
+
+func (s *ThreadSafeOrderedMap[K, V]) FilterBetween(cb func(k K, v V) bool, a, b K, opt ...int) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.Tree.FilterBetween(cb, a, b, opt...)
 }
 
 // RemoveAll implements [OrderedMap].

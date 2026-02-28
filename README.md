@@ -148,7 +148,9 @@ The following table provides a general overview of the methods in OrderedMap.
 | Contains | key K | bool | true if the key is between both the FirstKey and LastKey |
 | Put | key K, value V | int | Sets the key and value pair |
 | Get | key K | value V, ok bool | Returned the value for the key if ok is true|
+| GetKvSlice |  | []KvSet[K,V] | Returns the current internal slice used for read operations |
 | Filter | func(k K,v V) bool |  | deletes the given element when the callback returns true |
+| FilterBetween | cb func(k K, v V) bool,a,b K, opt ...int |  | likr filter, but only runs between a and b, for options [See](#between-options) |
 | Remove | key K | value V, ok bool | If ok is true, the returned value was removed based on the given key |
 | RemoveAll | | int | Clears all elements and returns how many elements were removed |
 | MassRemove | keys ...K | int |Tries to remove all keys provided, returns how many keys were removed |
@@ -162,6 +164,7 @@ The following table provides a general overview of the methods in OrderedMap.
 | RemoveBetweenKV | a,b K, opt ...int|  iter.Seq2[K, V] | Returns an iterator that contains the key/value pairs that were moved from between a and b. For options  [See](#between-options) |
 | ThreadSafe | | bool | Returns true if this instance is thread safe |
 | Merge | set OrderedMap[K, V] |int | Merges set into this instance |
+| FastMerge | set OrderedMap[K, V] |int | Merges set into this instance, this requires both set and the instance be sorted in the same order |
 | SetOverwrite | cb func(key K, oldValue, newValue V) | | Sets the callback method that fires before a value is overwritten |
 | SetGrowth | grow int| | Sets the internal growth value for the slice |
 | ToTs() | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper, other wise returns this instance |

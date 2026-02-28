@@ -104,4 +104,14 @@ type OrderedMap[K any, V any] interface {
 
 	// Deletes the given element when the callback returns true
 	Filter(func(k K, v V) bool)
+
+	// Like filter but only runs between elemetns a and b
+	FilterBetween(cb func(k K, v V) bool, a, b K, args ...int)
+
+	// Returns the current full Array
+	GetKvSlice() []KvSet[K, V]
+
+	// Fast merge operation always o(1).
+	// This requires both this instance and the set are in the same order.
+	FastMerge(set OrderedMap[K, V]) int
 }

@@ -1,7 +1,6 @@
 package omap
 
 import (
-	"cmp"
 	"iter"
 	"slices"
 )
@@ -44,12 +43,6 @@ func NewFromMap[K comparable, V any](m map[K]V, cb func(a, b K) int) *SliceTree[
 		s.Put(k, v)
 	}
 	return s
-}
-
-func getMid(size int) int {
-	// shift right 1 same as divide  by 2, bitwise is always faster
-	// size&1 is the same as size%2, but biwise is faster
-	return (size-2)>>1 + size&1
 }
 
 // Tries to remove the element of k, returns false if it fails.
@@ -219,54 +212,6 @@ func (s *SliceTree[K, V]) grow(size int) {
 	}
 }
 
-// Returns the index and offset of a given key.
-//
-// The index is the current relative postion in the slice.
-//
-// The offset represents where the item would be placed:
-//   - offset of 0, at index value.
-//   - offset of 1, expand the slice after the inddex and put the value to the right of the index
-//   - offset of -1, expand the slice before the index and put the value to left of the current postion
-//
-// Complexity: o(log n)
-func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {
-	end := len(Slices)
-	switch end {
-	case 0:
-		return 0, 0
-	case 1:
-		return 0, Cmp(k, Slices[0].Key)
-	}
-	mid := getMid(end)
-	end--
-	begin := 0
-	var diff int
-	for {
-		offset = Cmp(k, Slices[mid].Key)
-		if offset == 0 {
-			break
-		} else {
-			if offset == -1 {
-				end = mid - 1
-			} else {
-				begin = mid + 1
-			}
-			diff = end - begin
-			if diff <= 0 {
-				break
-			} else {
-				mid = begin + getMid(diff+1)
-			}
-		}
-	}
-	index = offset + mid
-	if index < 0 {
-		return mid, offset
-	}
-	offset = Cmp(k, Slices[index].Key)
-	return
-}
-
 // Returns an iterator for the current keys.
 // The internals of this iterator  do not lock the tree or prevent updates.  You can safely call an iterator from with an iterator.
 // and not run into deadlocks.
@@ -393,6 +338,31 @@ func (s *SliceTree[K, V]) UnSafeMassRemove(keys ...K) {
 	s.contig(len(keys), s.unsafeIter(keys), s.rangedel)
 }
 
+func (s *SliceTree[K, V]) FilterBetween(cb func(K, V) bool, a, b K, opt ...int) {
+	begin, end, _, ok := s.betweenChecks(a, b, opt...)
+	if !ok {
+		return
+	}
+	count := 0
+	Slices := s.Slices
+	size := len(Slices)
+	filtered := make([]KvSet[K, V], end-begin+1)
+	end += 1
+	offset := size - end
+	for _, kv := range Slices[begin:end] {
+		if !cb(kv.Key, kv.Value) {
+			filtered[count] = kv
+			count++
+		}
+	}
+	copy(Slices[begin:begin+count], filtered[0:count])
+	if offset != 0 {
+		copy(Slices[begin+count:], Slices[end:size])
+	}
+	s.Slices = Slices[0 : begin+count+offset]
+
+}
+
 func (s *SliceTree[K, V]) unsafeIter(keys []K) iter.Seq2[int, int] {
 	pos := len(keys) - 1
 	id := 0
@@ -406,24 +376,6 @@ func (s *SliceTree[K, V]) unsafeIter(keys []K) iter.Seq2[int, int] {
 			pos--
 		}
 	}
-}
-
-func KvIter[K any, V any](set []KvSet[K, V]) iter.Seq2[K, V] {
-	return func(yield func(K, V) bool) {
-		for _, row := range set {
-			if !yield(row.Key, row.Value) {
-				return
-			}
-		}
-	}
-}
-
-func (s *SliceTree[K, V]) rangedel(a, b int) {
-	s.Slices = slices.Delete(s.Slices, a, b+1)
-}
-
-func reverse(a, b int) int {
-	return cmp.Compare(b, a)
 }
 
 func (s *SliceTree[K, V]) contig(totalKeys int, r iter.Seq2[int, int], cb func(a, b int)) {
@@ -474,30 +426,40 @@ func (s *SliceTree[K, V]) FirstKey() (key K, ok bool) {
 	return
 }
 
-// Merges a map into an OrderedMap instance.
-func Merge[K comparable, V any](dst OrderedMap[K, V], src map[K]V) int {
-	count := 0
-	// is this worth trying to optimize?
-	for k, v := range src {
-		count++
-		dst.Put(k, v)
-	}
-	return count
-}
-
 // Merge implements [OrderedMap]
 func (s *SliceTree[K, V]) Merge(set OrderedMap[K, V]) int {
-	count := 0
 	// do not add to ourself!
 	if s == set {
 		return 0
 	}
+
+	size := s.Size()
 	// is this worth trying to optimize?
 	for k, v := range set.All() {
-		count++
 		s.Put(k, v)
 	}
-	return count
+
+	return s.Size() - size
+}
+
+func (s *SliceTree[K, V]) FastMerge(set OrderedMap[K, V]) int {
+	src := set.GetKvSlice()
+	size := s.Size()
+	if set.Size() == 0 {
+		return 0
+	}
+	if size == 0 {
+		copy(s.Slices, src)
+		return set.Size()
+	}
+
+	res, end := MergeKvSet(s.Slices, src, make([]KvSet[K, V], s.Size()+len(src)), 0, s.Size()-1, s.Cmp, s.OnOverWrite)
+	s.Slices = res[0 : end+1]
+	return s.Size() - size
+}
+
+func (s *SliceTree[K, V]) GetKvSlice() []KvSet[K, V] {
+	return s.Slices
 }
 
 // GetLastKey implements [OrderedMap]

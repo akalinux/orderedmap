@@ -276,3 +276,35 @@ func (s *CenterTree[K, V]) Filter(cb func(K, V) bool) {
 	s.End = s.Begin + total
 	s.Slices = s.CenteredSlice[s.Begin:s.End]
 }
+
+func (s *CenterTree[K, V]) FilterBetween(cb func(k K, v V) bool, a, b K, opt ...int) {
+	s.SliceTree.FilterBetween(cb, a, b, opt...)
+	s.End = s.Begin + s.Size()
+}
+
+func (s *CenterTree[K, V]) FastMerge(set OrderedMap[K, V]) int {
+	if set.Size() == 0 {
+		return 0
+	} else if s.Size() == 0 {
+		ns := make([]KvSet[K, V], set.Size()+s.Growth*2)
+		s.Begin = s.Growth
+		s.End = s.Begin + set.Size()
+		src := set.GetKvSlice()
+		copy(ns[s.Begin:], src)
+		s.CenteredSlice = ns
+		s.Slices = ns[s.Begin:s.End]
+		return set.Size()
+	}
+	src := set.GetKvSlice()
+	size := s.Size()
+
+	res, end := MergeKvSet(
+		s.CenteredSlice,
+		src,
+		make([]KvSet[K, V], s.Begin+s.Growth+s.Size()+len(src)),
+		s.Begin, s.End, s.Cmp, s.OnOverWrite)
+	s.CenteredSlice = res
+	s.End = end
+	s.Slices = res[s.Begin : s.End+1]
+	return s.Size() - size
+}

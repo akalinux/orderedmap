@@ -138,6 +138,14 @@ func TestCenterTreePut(t *testing.T) {
 			Sane(k)
 		}
 	}
+	nt = NewCenterTree[int, int](2, cmp.Compare)
+	for i := range 11 {
+		nt.Put(i, i)
+	}
+	nt.Put(5, 5)
+	if nt.Size() != 11 {
+		t.Fatalf("invalid size")
+	}
 }
 
 func TestCenterCoverageTests(t *testing.T) {
