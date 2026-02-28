@@ -75,9 +75,9 @@ The resulting output will be:
 ```
 We can now make things a bit smaller by removing things by a range.
  ```
-// Note, both "Sell" and "Universe", were never added to the instance,
+// Note, both "Sell" and "Zoo", were never added to the instance,
 // but the between operation works on these keys any ways.
-kv.RemoveBetween("Sell","Universe")
+kv.RemoveBetween("Sell","Zoo")
 
 // Itertor
 for k,v :=range kv.All() {
@@ -90,7 +90,7 @@ The resulting output will now be:
 
 __Why this works?__
   - The string "Sell" comes before the string "World" 
-  - The string "Universe" comes after the string "World"
+  - The string "Zoo" comes after the string "World"
 
 __How this works__
 
