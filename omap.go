@@ -48,7 +48,7 @@
 //
 // We can now make things a bit smaller by removing things by a range.
 //
-//	kv.RemoveBetween("Sell","Universe")
+//	kv.RemoveBetween("Sell","Zoo")
 //
 //	// Itertor
 //	for k,v :=range kv.All {
