@@ -1,5 +1,5 @@
 # OMAP a Sort Ordered map
-The fastests sorted map possible for caching, time-series, and scheduling.
+The fastests sorted map possible for searching by ranges.
 
 The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. 2x faster for time-series and sequential data.  The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.  Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.  An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
 
