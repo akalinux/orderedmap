@@ -31,7 +31,7 @@ Any one of these is a practical use case:
 ## Basic usage
 
 The omap package provides a common interface [OrderedMap](OrderedMap.go) implemented by the following:
-   - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go), Wrapper for [SliceTree](./SliceTree.go)
+   - Thread safe [ThreadSafeOrderedMap](./ThreadSafeOrderedMap.go), Wrapper for any [OrderedMap](./OrderedMap.go)
    - Not thread safe [SliceTree](./SliceTree.go), but can be converted to a thread safe instance.
    - Not thread safe [CenterTree](./CenterTree.go), but can be converted to a thread safe instance.
 
