@@ -1,52 +1,32 @@
 # OMAP a Sort Ordered map
-The fastests sorted map possible for caching, time-series, and scheduling.
+The fastests sorted map possible for searching by ranges.
 
-The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. 2x faster for time-series and sequential data.  The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.  Under spesific conditions or very large data sets, omap.SliceTree is faster on "Get" operations than the built in go map.  An omap.SliceTree instance uses signifigantly less the memory than the map feature in go.
+The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.
 
 Unlike tree-based maps, omap.SliceTree and omap.CenterTree range searches use direct slice referencing, avoiding tree traversal entirely.
 This is in general the optimized solution for caching, and time-series maps.
 
-
-# Performance Matters
-
-Performance objectives while maintinaing a sorted map:
-  - Lookups for both Put and Get operations are always a fixed complexity: o(log n).
-  - All iteration operations are fixed cost of o(1).
-  - Finding or removing elements between 2 points is always a fixed cost of o(log(n) + log(n)).
-  - Finding elements: at, before, or after a given point is always a fixed cost of o(log n)
-  - Mass Removal of unordered elements that may or may not exist has a maximum complexity of o(log(n) + log(k) + k)
-  - Pre-emptive but predictable growth, this is done by setting the Growth size.
-  - omap.SliceTree and omap.CenterTree support tunable pre-allocation
-
-__omap.SliceTree__: 
-  - Implements pre-allocated a sorted slice, the elements are sequential and start at 0
-  - This offers the fastest possible search speed, along with the fast bulk element deletion.
+What is this optimized for?
+  - appending and prepending elements to the internal array
+  - searching between 2 elements
+  - mass element removal between 2 elements
+  - merging objects via the FastMerge method
 
 __omap.CenterTree__
   - Implements pre-allocated a sorted slice, the elements are sequential and start at the center of the slice.
   - This offers fast search speed, along with the fastest possible range based bulk element deletion.
   - Insertion to the beginning or end of the array are done using pre-allocated memory and are o(1)
 
-
-__On Read For strings__:
-  - Small number of keys: omap.CenterTree and omap.SliceTree are slightly faster than go's interal map
-  - Large number of keys: omap.CenterTree and omap.SliceTree is o(log n) faster than go's internal map
-
 __On Write for strings__:
-  - Best Case, omap.CenterTree twice as fast on write over go's internal map
-  - Worst case, omap.CenterTree is half as fast on write as go's internal map 
+  - Best Case, omap.CenterTree faster than all other known orderd maps maps
+  - Worst case, omap.CenterTree is half as all other known maps
 
 ## When Should you use omap.CenterTree in place of a map?
 
 Any one of these is a practical use case:
-  - When using strings as keys and read performance matters
-  - A sorted map is required
-  - Memory constrained systems
-  - Fuzzy logic is required, IE the ability to find points in between keys
-  - When a combination of freequent updates and searching by ranges is requried
-  - Very large data sets where read speed is more important than write speed
-  - Keys that can not be represented as a comparable value
-  - When managing elements between ranges is required
+  - when all keys must be maintained in order
+  - Fuzzy logic lookups required, IE the ability to find points in between keys
+  - When elements are required to be primarily manipulated by ranges
 
 ## Basic usage
 
@@ -189,175 +169,4 @@ Returns all values up to "Tomorrow".
 
 ## Benchmarks
 
-If you want to see other benchmarks like comparing google's btree click [here](https://github.com/akalinux/benchmarksortedmaps)
-
-So benchmarks are always very subjective, but the real question is: what do we compare omap too?  The only real answer is the native map in go.
-Now this is in no way a fair comparison.. The omap package can use any data set, so long as a compare function can be provided, while the map in go only needs to be optimized internally for hashing bytes, so we would expected the native map feature to faster.
-
-__Disclamier:__ omap.SliceTree is built around a Compare function and omap.CenterTree is optimized for: appending and prepending, this means the benchmark requires creating a proxy key that is equal to the key provided by the Cmp function.  In this benchmark the key used for the map has to be generated from the base string, and the original string pointer and value then need to be saved off in an additional data structure, this gives us a like for like compare between the native go map feature and omap.SliceTree.
-
-The following holds true for these benchmarks
-  - All read/get operations are best case for go's internal map and worst case for omap.SliceTree and omap.CenterTree
-  - All write operations are worst case for omap.SliceTree and best case for go's internal map and omap.CenterTree
-
-__How well does omap compare native map feature in go?:__
-```
-BenchmarkNew/Native_map_Put_keys:_[1600]-10                          26880                   44712 ns/op           93056 B/op       1606 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[1600]-10                           17678                   67354 ns/op           41008 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[1600]-10                          45187                   26866 ns/op           82016 B/op          3 allocs/op
-BenchmarkNew/Native_map_Get_keys:_[1600]-10                          10000                  108296 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Get_keys:_[1600]-10                           10000                  106291 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Get_keys:_[1600]-10                          10000                  105921 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Count_between:_[1600]-10                        61                17819665 ns/op           22554 B/op       2944 allocs/op
-BenchmarkNew/SliceTree_Count_Between:_[1600]-10                       6261                  193573 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Count_Between:_[1600]-10                      6258                  191440 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put_keys:_[2500]-10                          15428                   77313 ns/op          169264 B/op       2510 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[2500]-10                            9609                  116953 ns/op           65584 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[2500]-10                          27031                   44275 ns/op          122976 B/op          3 allocs/op
-BenchmarkNew/Native_map_Get_keys:_[2500]-10                           5223                  211555 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Get_keys:_[2500]-10                            6735                  167211 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Get_keys:_[2500]-10                           7146                  163492 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Count_between:_[2500]-10                        26                43653353 ns/op           36999 B/op       4744 allocs/op
-BenchmarkNew/SliceTree_Count_Between:_[2500]-10                       4006                  280648 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Count_Between:_[2500]-10                      4016                  289124 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put_keys:_[3600]-10                           9950                  117816 ns/op          304880 B/op       3618 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[3600]-10                            5779                  180327 ns/op           90160 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[3600]-10                          20005                   59949 ns/op          180320 B/op          3 allocs/op
-BenchmarkNew/Native_map_Get_keys:_[3600]-10                           2528                  415280 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Get_keys:_[3600]-10                            4762                  246020 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Get_keys:_[3600]-10                           4780                  247967 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Count_between:_[3600]-10                         9               120736810 ns/op           54710 B/op       6944 allocs/op
-BenchmarkNew/SliceTree_Count_Between:_[3600]-10                       2800                  430063 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Count_Between:_[3600]-10                      2800                  432644 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Put_keys:_[4900]-10                           7699                  155597 ns/op          336080 B/op       4918 allocs/op
-BenchmarkNew/Slicetree_Put_keys:_[4900]-10                            3792                  294403 ns/op          122928 B/op          2 allocs/op
-BenchmarkNew/CenterTree_Put_keys:_[4900]-10                          13556                   89000 ns/op          237664 B/op          3 allocs/op
-BenchmarkNew/Native_map_Get_keys:_[4900]-10                            777                 1465044 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Get_keys:_[4900]-10                            3378                  365350 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Get_keys:_[4900]-10                           3321                  361986 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_map_Count_between:_[4900]-10                         4               282676296 ns/op           75682 B/op       9544 allocs/op
-BenchmarkNew/SliceTree_Count_Between:_[4900]-10                       1942                  619004 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Count_Between:_[4900]-10                      1818                  623259 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Put_keys:_100-10                 1000000000               0.0000040 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_Put_keys:_100-10              1000000000               0.0000035 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_Put_keys:_100-10             1000000000               0.0000043 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Get_keys:_100-10                 1000000000               0.0000010 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_int_Get_keys:_100-10          1000000000               0.0000033 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_int_Get_keys:_100-10         1000000000               0.0000024 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Put_keys:_1000-10                1000000000               0.0000236 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_Put_keys:_1000-10             1000000000               0.0000186 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_Put_keys:_1000-10            1000000000               0.0000100 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Get_keys:_1000-10                1000000000               0.0000055 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_int_Get_keys:_1000-10         1000000000               0.0000309 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_int_Get_keys:_1000-10        1000000000               0.0000265 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Put_keys:_10000-10               1000000000               0.0000931 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_Put_keys:_10000-10            1000000000               0.0002200 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_Put_keys:_10000-10           1000000000               0.0000737 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint64_Get_keys:_10000-10               1000000000               0.0000505 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint64_int_Get_keys:_10000-10        1000000000               0.0003788 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint64_int_Get_keys:_10000-10       1000000000               0.0003550 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Put_keys:_10-10                   1000000000               0.0000007 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Put_keys:_10-10            1000000000               0.0000008 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Put_keys:_10-10           1000000000               0.0000006 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Get_keys:_10-10                   1000000000               0.0000006 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Get_keys:_10-10            1000000000               0.0000007 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Get_keys:_10-10           1000000000               0.0000005 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Put_keys:_100-10                  1000000000               0.0000020 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Put_keys:_100-10           1000000000               0.0000022 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Put_keys:_100-10          1000000000               0.0000032 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Get_keys:_100-10                  1000000000               0.0000020 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Get_keys:_100-10           1000000000               0.0000023 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Get_keys:_100-10          1000000000               0.0000018 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Put_keys:_255-10                  1000000000               0.0000052 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Put_keys:_255-10           1000000000               0.0000066 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Put_keys:_255-10          1000000000               0.0000078 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/Native_Map_Uint8_Get_keys:_255-10                  1000000000               0.0000048 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/SliceTree_Map_Uint8_int_Get_keys:_255-10           1000000000               0.0000079 ns/op               0 B/op          0 allocs/op
-BenchmarkNew/CenterTree_Map_Uint8_int_Get_keys:_255-10          1000000000               0.0000053 ns/op               0 B/op          0 allocs/op
-```
-
-__How to read the benchmark__
-
-So what do these numbers really tell us?  Well nothing we didn't all ready know prior to the benchmark. The map feature of
-go trades memory for read and write speed,  in particular on wirte.  Usually platforms are more cpu constrained than memory constrained, but that isn't always the case.  So we are looking at worst case reads for all omap based benhmarks and best case write for go's
-internal map and omap.CenterTree.  In that aspect omap.CenterTree is a little more twice as fast best case over go's internal map for 
-writes, but why?  Read to the end of this file for details.. Benchmarks are always a zero sum game!
-
-What version of go did you run this on?
-  - 1.26
-
-What setup did you use?
-  - cpu: AMD Ryzen 9 9950X 16-Core Processor
-  - mem: dd5 6k mt
-  - set -cpu 10
-  - VM: Container under windows in docker desktop: Linux d2f8535c6a45 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
-
-On write:
-  - omap.CenterTree is faster ( when appending or prepending )
-  - Most cases in smaller to medium data sets go's map is faster.. But not always.. 
-
-On read:
-  - Go map map is faster when it comes to integers on both read and write
-  - omap.SliceTree and omap.CenterTree are faster when it comes to strings
-
-Where the native map in go always perfoms worse is in memory usage:
-  - Go map uses about 45%-70% more memory than omap.SliceTree or omap.CenterTree.
-
-Scanning for any key between 2 strings:
-  - Go map must be iterated over and each key must be compared o(n)
-  - omap.SliceTree and omap.CenterTree are just o(log(n)+log(n))
-
-So which is better for performance? For strings omap.SliceTree or omap.CenterTree, for int/float there is a use case for go's internal map
-but its benefits don't outweigh its losses.
-
-Scanning all keys for every key is a known worst case.. so why include it?  People do it, and most sorted map packages on [pkg.go.dev](https://pkg.go.dev) will force you do do that at least until you reach the end of your range.
-
-__Why does the native go map read slow down so much after just 1600 strings?__
-
-Its complicated, but its a combination of memory bandwidth and the internals the go native map doing full scans due to a large number of collisions.
-
-__Why is SliceTree always slower on write?__
-
-Simple: O(log n) on lookup, has to be done prior to a write.  Go's internal map skips the compare operation all until the 3rd tier.
-The very thing that gives omap.SliceTree its read speed at scale slows it down in write operations.
-
-__So which is better SliceTree CenterTree or a map?__
-
-When it comes to read performance of strings, omap.SliceTree and omap.CenterTree are always faster.
-The omap.Slicetree object is built entirly around being able to find a range of keys without scanning. 
-The omap.CenterTree is optimized for pre-pending and appending data to the slice.  The map provided by go is built around hashing.
-WHen it comes to a map of uint64, go's internal map has a slight edge in performance.
-
-__Why include memory in benchmarks?__
-
-This is a complex topic, but here is a short answer: Try turning memory benchmarks on for other sorted map pacakges on [pkg.go.dev](https://pkg.go.dev), they use orders of magnitued more memory than the native map in go. Most sorted map implementations arn't performacne competative with the native map in go.  The omap.SliceTree/omap.CenterTree is at least competative with the native go map implementation.  In spesific use cases omap.SliceTree and omap.CenterTree are signifigantly faster than the native map feature of go.  An instance of omap.SliceTree or omap.CenterTree do all this while being an sorted map, that is no small feat.
-
-__Comapring go map o(1) and omap.SliceTee o(log(n))__
-
-__Go map: o(1) How so?__  In truth go map uses the first 2 bytes of a hash as keys in a 2 tier tree, the remaing bytes then hit the o(1) or full scan.  This is the sweet spot on most use cases.  The side effect is, keys are never going to be ordered.
-
-__omap.Slicetree is o(log n)?__ The omap.SliceTree is a btree with os type int(32|64) as its limit, indexed by sequence order. An omap.SliceTree instance is never a full scan, but an Order First Search is always more expensive in smaller sets and always cheaper in larger sets.  Effectivly omap.SliceTree is pure an Order First search with the root at the median of the array.  This hits the sweet spot for range based lookups and massive data sets.  The side effect is an ordered index of keys.
-
-__omap.CenterTree is way faster than go's map on these benchmarks.. how so?__  The omap.CenterTree is optimized for pushing data to the
-begin and end of the array.  The array is pre-allocated and the data is stored in the middle of the array.  Thus putting things before
-the fist value or after the last value are super cheap. When you write to the middle go's internal map should usually be faster, but not always.
-
-__Odd Quirks of indexing__
-
-So which is faster a 1 byte key using a map or omap.SliceTree?
-  - On Write: omap.CenterTree is faster for append and prepend
-  - On Read: go's map is slightly faster than omap.SliceTree
-
-So which is faster a 2 byte key using a map in go with 65535 elements or omap.SliceTree?
-  - at 2 bytes a normal map in go is faster
-
-So when does omap.Slicetree actually become faster? 
-  - when a map in go would end up with colisions on the 3rd tier, this causes a full scan of that tier.
-  - when does that happen?  Usually after a few thousand unique strings, but it depends on which buckets they land.
-
-Is omap.SliceTree or omap.CenterTree ever faster with ints or floats?
-  - Yes on range scans
-
-Why does omap.CenterTree have such good write perfomance?? is the 2x performance over go's internal map real?
-  - Its a trap!  In reality it omap.CenterTree is optimized for append and prepend.
-  - if not appending or pre-pending there is roughly a 30-50% write performance penalty due to the O(log n) lookup tax
+All benchmarks have been moved [here](https://github.com/akalinux/benchmarksortedmaps).
