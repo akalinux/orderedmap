@@ -169,4 +169,4 @@ Returns all values up to "Tomorrow".
 
 ## Benchmarks
 
-All benchmarks have been moved [here|(https://github.com/akalinux/benchmarksortedmaps)].
+All benchmarks have been moved [here](https://github.com/akalinux/benchmarksortedmaps).
