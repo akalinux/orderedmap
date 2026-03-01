@@ -46,9 +46,9 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 	end--
 	begin := 0
 	var diff int
+	offset = Cmp(k, Slices[mid].Key)
 MAIN:
 	for {
-		offset = Cmp(k, Slices[mid].Key)
 		switch offset {
 		case 0:
 			break MAIN
@@ -58,35 +58,19 @@ MAIN:
 			begin = mid + 1
 		}
 		diff = end - begin
+		offset = Cmp(k, Slices[diff+1].Key)
 		if diff <= 0 {
 			break
 		} else {
 			mid = begin + getMid(diff+1)
 		}
-		/*
-			if offset == 0 {
-				break MAIN
-			} else {
-				if offset == -1 {
-					end = mid - 1
-				} else {
-					begin = mid + 1
-				}
-				diff = end - begin
-				if diff <= 0 {
-					break
-				} else {
-					mid = begin + getMid(diff+1)
-				}
-			}
-		*/
+
 	}
 	index = offset + mid
 	if index < 0 {
 		return mid, offset
 	}
 
-	offset = Cmp(k, Slices[index].Key)
 	return
 }
 
