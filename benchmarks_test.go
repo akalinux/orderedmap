@@ -9,7 +9,7 @@ import (
 const FORMAT = "%05d"
 
 func BenchmarkNew(b *testing.B) {
-	for _, size := range []int{10000} {
+	for _, size := range []int{10000, 5000, 100} {
 		var m map[string]any
 		var s OrderedMap[string, any]
 		BuildM := func() {
