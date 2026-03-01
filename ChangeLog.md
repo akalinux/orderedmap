@@ -145,3 +145,6 @@ v1.1.41
   - All benchmark have been moved to a sperate project [here](https://github.com/akalinux/benchmarksortedmaps)
   - Fixed formatting of the ChangeLog.md
   - NewTs internals now uses an instance of CenterTree
+
+v1.1.42
+  - Added project link to README.md
