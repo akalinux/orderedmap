@@ -34,20 +34,20 @@ func reverse(a, b int) int {
 //   - offset of -1, expand the slice before the index and put the value to left of the current postion
 //
 // Complexity: o(log n)
-func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {
+func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index int, offset int8) {
 	end := len(Slices)
 	switch end {
 	case 0:
 		return 0, 0
 	case 1:
-		return 0, Cmp(k, Slices[0].Key)
+		return 0, int8(Cmp(k, Slices[0].Key))
 	}
 	mid := getMid(end)
 	end--
 	begin := 0
 	var diff int
 	for {
-		offset = Cmp(k, Slices[mid].Key)
+		offset = int8(Cmp(k, Slices[mid].Key))
 		if offset == 0 {
 			break
 		} else {
@@ -64,12 +64,12 @@ func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (in
 			}
 		}
 	}
-	index = offset + mid
+	index = int(offset) + mid
 	if index < 0 {
 		return mid, offset
 	}
 
-	offset = Cmp(k, Slices[index].Key)
+	offset = int8(Cmp(k, Slices[index].Key))
 	return
 }
 

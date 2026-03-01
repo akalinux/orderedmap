@@ -47,18 +47,18 @@ func TestGetIndex(t *testing.T) {
 	}
 	index, offset := GetIndex(12, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
-	if s.Slices[index+offset].Key != 12 {
-		t.Fatalf("Failed to fetchg our indexed value, expected: 12, got %d", s.Slices[index+offset].Key)
+	if s.Slices[index+int(offset)].Key != 12 {
+		t.Fatalf("Failed to fetchg our indexed value, expected: 12, got %d", s.Slices[index+int(offset)].Key)
 	}
 	index, offset = GetIndex(2, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
-	if s.Slices[index+offset].Key != 2 {
+	if s.Slices[index+int(offset)].Key != 2 {
 		t.Fatalf("Failed to fetchg our indexed value")
 	}
 
 	index, offset = GetIndex(14, s.Cmp, s.Slices)
 	t.Logf("Got index: %d, offset: %d", index, offset)
-	if s.Slices[index+offset].Key != 14 {
+	if s.Slices[index+int(offset)].Key != 14 {
 		t.Fatalf("Failed to fetchg our indexed value")
 	}
 
@@ -91,8 +91,8 @@ func TestGetIndex(t *testing.T) {
 	}
 	index, offset = GetIndex(4, s.Cmp, s.Slices)
 	t.Logf("Index: %d, Offset: %d", index, offset)
-	if index+offset != 4 {
-		t.Fatalf("Expected: 4, got: %d", index+offset)
+	if index+int(offset) != 4 {
+		t.Fatalf("Expected: 4, got: %d", index+int(offset))
 	}
 
 }

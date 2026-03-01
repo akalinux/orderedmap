@@ -68,7 +68,7 @@ func (s *CenterTree[K, V]) MassRemoveKV(keys ...K) iter.Seq2[K, V] {
 	return seq
 }
 
-func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
+func (s *CenterTree[K, V]) reballance(offset int8, idx int) (pos int) {
 
 	pos = -1
 	limit := cap(s.CenteredSlice) - 1
@@ -112,15 +112,15 @@ func (s *CenterTree[K, V]) Put(k K, v V) {
 
 	limit := cap(s.CenteredSlice) - 1
 	var idx int
-	var offset int
+	var offset int8
 	Cmp := s.Cmp
 	if size > 10 {
-		if offset = Cmp(k, Slices[0].Key); offset < 1 {
-		} else if offset = Cmp(k, Slices[size-1].Key); offset > -1 {
+		if offset = int8(Cmp(k, Slices[0].Key)); offset < 1 {
+		} else if offset = int8(Cmp(k, Slices[size-1].Key)); offset > -1 {
 			idx = size - 1
 		} else {
 			mid := getMid(size)
-			offset = Cmp(k, Slices[mid].Key)
+			offset = int8(Cmp(k, Slices[mid].Key))
 			switch offset {
 			case 0:
 				idx = mid

@@ -5,6 +5,8 @@ import (
 	"slices"
 )
 
+const SUB_ONE int8 = -1
+
 type SliceTree[K any, V any] struct {
 
 	// Internally managed keys slice
@@ -50,7 +52,7 @@ func NewFromMap[K comparable, V any](m map[K]V, cb func(a, b K) int) *SliceTree[
 func (s *SliceTree[K, V]) Remove(k K) (value V, ok bool) {
 
 	idx, offset := GetIndex(k, s.Cmp, s.Slices)
-	i := idx + offset
+	i := idx + int(offset)
 	if i >= 0 && i < len(s.Slices) {
 		value = s.Slices[i].Value
 	}
@@ -128,7 +130,7 @@ func (s *SliceTree[K, V]) Exists(k K) bool {
 	return o == 0
 }
 
-func (s *SliceTree[K, V]) clearIdx(idx, offset int) (result bool) {
+func (s *SliceTree[K, V]) clearIdx(idx int, offset int8) (result bool) {
 
 	size := len(s.Slices)
 	if offset != 0 || size == 0 || idx >= size || idx < 0 {
@@ -164,7 +166,7 @@ func (s *SliceTree[K, V]) Size() int {
 //
 // Using a combinaiton of GetIndex and SetIndex lets you bypass the o(log n) comlexity when wiring to the same node over and over again.
 // The value reutrned from Put can be used to update the internals using SetIndex with the offset being 0.
-func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
+func (s *SliceTree[K, V]) SetIndex(idx int, offset int8, k K, v V) (index int) {
 	size := len(s.Slices)
 	if offset != 0 {
 		ns := size + 1
@@ -175,9 +177,9 @@ func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 		case 0:
 			copy(s.Slices[1+os:], s.Slices[os:size])
 			s.Slices[os] = KvSet[K, V]{k, v}
-			return os
+			return int(os)
 		default:
-			index = idx + os
+			index = idx + int(os)
 			copy(s.Slices[index+1:], s.Slices[index:size])
 			s.Slices[index] = KvSet[K, V]{k, v}
 			return
@@ -494,8 +496,8 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K, opt ...int) (begin, end, total i
 		return
 	}
 
-	var c int
-	var d int
+	var c int8
+	var d int8
 	if len(opt) == 0 {
 		begin, c = GetIndex(a, s.Cmp, s.Slices)
 		end, d = GetIndex(b, s.Cmp, s.Slices)
@@ -521,10 +523,10 @@ func (s *SliceTree[K, V]) betweenChecks(a, b K, opt ...int) (begin, end, total i
 	}
 
 	if d < 1 {
-		end += d
+		end += int(d)
 	}
 	if c > 0 {
-		begin += c
+		begin += int(c)
 	}
 
 	if begin > end {
