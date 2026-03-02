@@ -36,41 +36,48 @@ func reverse(a, b int) int {
 // Complexity: o(log n)
 func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {
 	end := len(Slices)
-	switch end {
-	case 0:
-		return 0, 0
-	case 1:
-		return 0, Cmp(k, Slices[0].Key)
-	}
-	mid := getMid(end)
-	end--
-	begin := 0
-	var diff int
-	for {
-		offset = Cmp(k, Slices[mid].Key)
-		if offset == 0 {
-			break
-		} else {
-			if offset == -1 {
-				end = mid - 1
-			} else {
-				begin = mid + 1
+	if end < 3 {
+		switch end {
+		case 0:
+			return 0, 0
+		case 1:
+			return 0, Cmp(k, Slices[0].Key)
+		case 2:
+			// being lazy for just 2 elements
+			offset = Cmp(k, Slices[0].Key)
+			if offset < 1 {
+				return 0, offset
 			}
-			diff = end - begin
-			if diff <= 0 {
-				break
-			} else {
-				mid = begin + getMid(diff+1)
-			}
+			return 1, Cmp(k, Slices[1].Key)
 		}
-	}
-	index = offset + mid
-	if index < 0 {
-		return mid, offset
+		return
 	}
 
-	offset = Cmp(k, Slices[index].Key)
-	return
+	mid := getMid(end)
+	offset = Cmp(k, Slices[mid].Key)
+	end--
+	begin := 0
+	diff := 0
+	for {
+		switch offset {
+		case -1:
+			// moving left
+			end = mid - 1
+			diff = end - begin
+		case 0:
+			return mid, 0
+		case 1:
+			begin = mid + 1
+			diff = end - begin
+		}
+		if diff == 0 {
+			return begin, Cmp(k, Slices[begin].Key)
+		} else if diff < 0 {
+			return begin, -1
+		}
+		mid = begin + getMid(diff+1)
+		offset = Cmp(k, Slices[mid].Key)
+	}
 }
 
 func getMid(size int) int {
