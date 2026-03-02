@@ -53,5 +53,24 @@ func BenchmarkNew(b *testing.B) {
 				}
 			}
 		})
+
+		set := []KvSet[int, any]{}
+		for i := range size {
+			set = append(set, KvSet[int, any]{i, i})
+		}
+		b.Run("Test GetIndex", func(b *testing.B) {
+			for range b.N {
+				for i := range size {
+					GetIndex(i, cmp.Compare, set)
+				}
+			}
+		})
+		b.Run("Test LessIndex", func(b *testing.B) {
+			for range b.N {
+				for i := range size {
+					LessIndex(i, cmp.Less, set)
+				}
+			}
+		})
 	}
 }

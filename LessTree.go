@@ -2,7 +2,7 @@ package omap
 
 func LessIndex[K any, V any](k K, Less func(a, b K) bool, Slice []KvSet[K, V]) (idx, offset int) {
 
-	size := len(Slice)
+	end := len(Slice)
 
 	Cmp := func(id int) int {
 		if Less(k, Slice[id].Key) {
@@ -14,8 +14,8 @@ func LessIndex[K any, V any](k K, Less func(a, b K) bool, Slice []KvSet[K, V]) (
 		}
 	}
 
-	if size < 3 {
-		switch size {
+	if end < 3 {
+		switch end {
 		case 0:
 			return 0, 0
 		case 1:
@@ -31,24 +31,23 @@ func LessIndex[K any, V any](k K, Less func(a, b K) bool, Slice []KvSet[K, V]) (
 		return
 	}
 
-	mid := getMid(size)
+	mid := getMid(end)
 	offset = Cmp(mid)
 	idx = mid
-	end := size - 1
+	end--
 	begin := 0
 	diff := 0
 	for {
 		switch offset {
+		case 0:
+			return mid, 0
 		case -1:
 			// moving left
 			end = mid - 1
 			diff = end - begin
-
 		case 1:
 			begin = mid + 1
 			diff = end - begin
-		case 0:
-			return mid, 0
 		}
 		if diff == 0 {
 			return begin, Cmp(begin)
