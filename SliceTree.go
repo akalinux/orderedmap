@@ -637,3 +637,15 @@ func (s *SliceTree[K, V]) Filter(cb func(K, V) bool) {
 	}
 	s.Slices = ns
 }
+
+func (s *SliceTree[K, V]) Clone() OrderedMap[K, V] {
+
+	res := NewSliceTree[K, V](s.Growth, s.Cmp)
+	if s.Size() != 0 {
+		ns := make([]KvSet[K, V], len(s.Slices), cap(s.Slices))
+		copy(ns[0:len(s.Slices)], s.Slices[0:len(s.Slices)])
+		res.Slices = ns
+	}
+
+	return res
+}

@@ -148,5 +148,10 @@ v1.1.41
 
 v1.1.42
   - Added project link to README.md
+
 v1.1.43
   - Minor speedup in indexer function
+
+v1.1.44
+  - Added Clone interface
+

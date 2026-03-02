@@ -321,3 +321,18 @@ func (s *CenterTree[K, V]) FastMerge(set OrderedMap[K, V]) int {
 	s.Slices = res[s.Begin : s.End+1]
 	return s.Size() - size
 }
+
+func (s *CenterTree[K, V]) Clone() OrderedMap[K, V] {
+
+	res := NewCenterTree[K, V](s.Growth, s.Cmp)
+	if s.Size() != 0 {
+
+		ns := make([]KvSet[K, V], len(s.CenteredSlice), cap(s.CenteredSlice))
+		copy(ns, s.CenteredSlice)
+		res.Begin = s.Begin
+		res.End = s.End
+		res.Slices = s.CenteredSlice[s.Begin : s.End+1]
+	}
+
+	return res
+}

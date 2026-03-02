@@ -117,4 +117,7 @@ type OrderedMap[K any, V any] interface {
 
 	// Returns a slice containing the keys and values between a and b
 	GetBetweenKvSlice(a, b K, opt ...int) []KvSet[K, V]
+
+	// Returns a new instance based on the current instance
+	Clone() OrderedMap[K, V]
 }

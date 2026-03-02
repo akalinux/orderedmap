@@ -265,3 +265,10 @@ func (s *ThreadSafeOrderedMap[K, V]) SetGrowth(grow int) {
 	s.Tree.SetGrowth(grow)
 
 }
+
+// Returns a new thread safe copy of this instance
+func (s *ThreadSafeOrderedMap[K, V]) Clone() OrderedMap[K, V] {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	return s.Tree.Clone().ToTs()
+}

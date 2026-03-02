@@ -149,7 +149,8 @@ The following table provides a general overview of the methods in OrderedMap.
 | FastMerge | set OrderedMap[K, V] |int | Merges set into this instance, this requires both set and the instance be sorted in the same order |
 | SetOverwrite | cb func(key K, oldValue, newValue V) | | Sets the callback method that fires before a value is overwritten |
 | SetGrowth | grow int| | Sets the internal growth value for the slice |
-| ToTs() | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper, other wise returns this instance |
+| ToTs | | OrderedMap[K, V] | If this instance is not contained in a thread safe wrapper, returns this instance in a thread safe wrapper, other wise returns this instance |
+| Clone | | OrderedMap[K, V] | Returns a new instance of self |
 ### Between Options
 
 The following table exlains the usage and possible values for functions that support between operations.
