@@ -48,5 +48,9 @@ func TestUpgradedGetIndex(t *testing.T) {
 	Expected(0, 0, 0)
 	Expected(1, 1, 0)
 	Expected(2, 2, 0)
+	Slice = []KvSet[int, int]{{0, 0}, {3, 3}, {5, 5}, {7, 7}}
+	Expected(2, 0, 1)
+	Expected(6, 3, -1)
+	Expected(7, 3, 0)
 
 }

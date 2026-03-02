@@ -104,12 +104,13 @@ func (s *SliceTree[K, V]) Set(index int, v V) (status bool) {
 
 // Tries to fetch value based on key of k, if k does not exist, found is false.
 func (s *SliceTree[K, V]) Get(k K) (value V, found bool) {
-	if len(s.Slices) == 0 {
+	Slices := s.Slices
+	if len(Slices) == 0 {
 		return
 	}
-	i, o := GetIndex(k, s.Cmp, s.Slices)
+	i, o := GetIndex(k, s.Cmp, Slices)
 	if o == 0 {
-		return s.Slices[i].Value, true
+		return Slices[i].Value, true
 	}
 	return
 }

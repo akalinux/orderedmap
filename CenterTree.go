@@ -37,6 +37,19 @@ func NewCenterTree[K any, V any](growth int, cmp func(a, b K) int) *CenterTree[K
 
 }
 
+// Tries to fetch value based on key of k, if k does not exist, found is false.
+func (s *CenterTree[K, V]) Get(k K) (value V, found bool) {
+	Slices := s.Slices
+	if len(Slices) == 0 {
+		return
+	}
+	i, o := GetIndex(k, s.Cmp, Slices)
+	if o == 0 {
+		return Slices[i].Value, true
+	}
+	return
+}
+
 // Remove implemenets [OrderedMap]
 func (s CenterTree[K, V]) Remove(key K) (value V, ok bool) {
 	value, ok = s.SliceTree.Remove(key)
