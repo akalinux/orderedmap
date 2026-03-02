@@ -65,12 +65,14 @@ func BenchmarkNew(b *testing.B) {
 				}
 			}
 		})
-		b.Run("Test LessIndex", func(b *testing.B) {
-			for range b.N {
-				for i := range size {
-					LessIndex(i, cmp.Less, set)
+		/*
+			b.Run("Test LessIndex", func(b *testing.B) {
+				for range b.N {
+					for i := range size {
+						LessIndex(i, cmp.Less, set)
+					}
 				}
-			}
-		})
+			})
+		*/
 	}
 }

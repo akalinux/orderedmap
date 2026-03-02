@@ -1,5 +1,6 @@
 package omap
 
+/*
 func LessIndex[K any, V any](k K, Less func(a, b K) bool, Slice []KvSet[K, V]) (idx, offset int) {
 
 	end := len(Slice)
@@ -58,3 +59,4 @@ func LessIndex[K any, V any](k K, Less func(a, b K) bool, Slice []KvSet[K, V]) (
 		mid = begin + getMid(diff+1)
 	}
 }
+*/
