@@ -155,3 +155,5 @@ v1.1.43
 v1.1.44
   - Added Clone interface
 
+v1.1.45
+  - Small Code and unit test clean ups

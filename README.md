@@ -1,6 +1,7 @@
 # OMAP a Sort Ordered map
 The fastests sorted map possible for searching by ranges.
 [![Go Reference](https://pkg.go.dev/badge/github.com/akalinux/orderedmap.svg)](https://pkg.go.dev/github.com/akalinux/orderedmap)
+[![Go Report Card](https://goreportcard.com/badge/github.com/akalinux/orderedmap)](https://goreportcard.com/report/github.com/akalinux/orderedmap)
 
 The omap.OrderedMap instances offer a high-performance thread-safe sorted map for Go. Optimized for O(log n) lookups and O(1) boundary inserts using pre-allocated circular slices. The drivers of the design process was the creation of a very good scheduler that could also double as a ttl cache deprecation engine.  Technically the omap package implements very minital btree using a slice. The btree implementation is ordered and does not allow for duplicates; The internals manage keys by splicing the internal slice. The side effect of this design results in what operates exactly like sorted map.
 
