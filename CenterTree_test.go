@@ -52,7 +52,7 @@ func TestCenterTreePut(t *testing.T) {
 		}
 		t.Logf("Begin: %d, end: %d, cap: %d, Growth: %d", nt.Begin, nt.End, cap(nt.CenteredSlice), nt.Growth)
 	}
-	t.Logf("Initalization test")
+	t.Logf("Initialization test")
 	Sane(3)
 	t.Logf("Ovewrwrite test")
 	nt.Put(3, -3)
@@ -125,7 +125,7 @@ func TestCenterTreePut(t *testing.T) {
 	t.Log("Forc left hand side growth")
 	Sane(-1)
 
-	t.Logf("** Known probelm data sets that can reveal bugs")
+	t.Logf("** Known problem data sets that can reveal bugs")
 	for setId, set := range [][]int{
 		{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 		{8, 9, 7, 3, 5, 4, 6, 0, 1, 2},

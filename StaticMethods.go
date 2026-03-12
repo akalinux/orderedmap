@@ -26,12 +26,12 @@ func reverse(a, b int) int {
 
 // Returns the index and offset of a given key.
 //
-// The index is the current relative postion in the slice.
+// The index is the current relative position in the slice.
 //
 // The offset represents where the item would be placed:
 //   - offset of 0, at index value.
 //   - offset of 1, expand the slice after the inddex and put the value to the right of the index
-//   - offset of -1, expand the slice before the index and put the value to left of the current postion
+//   - offset of -1, expand the slice before the index and put the value to left of the current position
 //
 // Complexity: o(log n)
 func GetIndex[K any, V any](k K, Cmp func(a, b K) int, Slices []KvSet[K, V]) (index, offset int) {

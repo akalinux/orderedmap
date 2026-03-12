@@ -1,5 +1,5 @@
 v1.0.0
-  - inital release
+  - initial release
 
 v1.0.1
   - documentation updates

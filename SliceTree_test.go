@@ -100,7 +100,7 @@ func TestGetIndex(t *testing.T) {
 func TestIdxSet(t *testing.T) {
 	s := NewSliceTree[int, int](0, cmp.Compare)
 
-	t.Log("Setting inital set of 0,0,1,0")
+	t.Log("Setting initial set of 0,0,1,0")
 	expected := []int{1}
 	s.SetIndex(0, 0, 1, 0)
 	checkExpected(t, "Set 0", expected, s.Slices)
@@ -360,7 +360,7 @@ func TestIters(t *testing.T) {
 		}
 		id++
 	}
-	// yeild callack tests
+	// yield callack tests
 
 	for range s.Keys() {
 		break
@@ -793,7 +793,7 @@ func betweeTests(t *testing.T, name string, cb func() OrderedMap[int, int], a, b
 	if sum != check && count != total {
 		t.Fatalf("Failed iter test")
 	}
-	// Validate that the call to yeild works
+	// Validate that the call to yield works
 	for range seq {
 		break
 	}
@@ -861,13 +861,13 @@ func TestContains(t *testing.T) {
 		s.Put(i, i+3)
 	}
 	if !s.Contains(1) {
-		t.Fatalf("our set should contian 1")
+		t.Fatalf("our set should contain 1")
 	}
 	if s.Contains(-1) {
-		t.Fatalf("our set should not contian -1")
+		t.Fatalf("our set should not contain -1")
 	}
 	if s.Contains(3) {
-		t.Fatalf("our set should not contian 3")
+		t.Fatalf("our set should not contain 3")
 	}
 }
 

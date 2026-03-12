@@ -13,12 +13,12 @@ type SliceTree[K any, V any] struct {
 	// Compare function.
 	Cmp func(a, b K) int
 
-	// Required non 0 value, determins by what capacity we grow the internal
+	// Required non 0 value, determines by what capacity we grow the internal
 	// Slice.  Default is 1.
 	Growth int
 
 	// Required non nil value, called when ever a value is overwritten.
-	// Seting this funtion saves on having to write a check when data is overwritten.
+	// Seting this function saves on having to write a check when data is overwritten.
 	OnOverWrite func(key K, oldValue V, newValue V)
 }
 
@@ -163,7 +163,7 @@ func (s *SliceTree[K, V]) Size() int {
 // Sets the given k,v pair based on the index and offset provided by a call to GetIndex.
 // Returns the resulting array index id.
 //
-// Using a combinaiton of GetIndex and SetIndex lets you bypass the o(log n) comlexity when wiring to the same node over and over again.
+// Using a combination of GetIndex and SetIndex lets you bypass the o(log n) comlexity when wiring to the same node over and over again.
 // The value reutrned from Put can be used to update the internals using SetIndex with the offset being 0.
 func (s *SliceTree[K, V]) SetIndex(idx, offset int, k K, v V) (index int) {
 	size := len(s.Slices)
