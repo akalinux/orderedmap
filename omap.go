@@ -30,7 +30,7 @@
 //	"Hello \n"
 //
 // The index lookup creates 2 values for each potential key:
-//   - Array postion, example: 0
+//   - Array position, example: 0
 //   - Offset can be any of the following: -1,0,1
 //
 // Since lookups create both an index position and offsett, it becomes possible to look for the following:

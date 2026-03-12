@@ -57,7 +57,7 @@ func main() {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)
 	}
 
-	// Get all Keys and Values beteen 3 and 11
+	// Get all Keys and Values between 3 and 11
 	fmt.Printf("\n#Keys and Values, between a range\n")
 	for key, value := range s.BetweenKV(3, 11) {
 		fmt.Printf("  Key: %d, String: [%s]\n", key, value)

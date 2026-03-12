@@ -157,3 +157,4 @@ v1.1.44
 
 v1.1.45
   - Small Code and unit test clean ups
+  - Documentation and comment cleanups
