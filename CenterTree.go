@@ -83,7 +83,6 @@ func (s *CenterTree[K, V]) MassRemoveKV(keys ...K) iter.Seq2[K, V] {
 
 func (s *CenterTree[K, V]) reballance(offset, idx int) (pos int) {
 
-	pos = -1
 	limit := cap(s.CenteredSlice) - 1
 	os := 0
 	begin := 0

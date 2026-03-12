@@ -133,7 +133,7 @@ func (s *SliceTree[K, V]) clearIdx(idx, offset int) (result bool) {
 
 	size := len(s.Slices)
 	if offset != 0 || size == 0 || idx >= size || idx < 0 {
-		result = false
+		return false
 	} else if size == 1 {
 		// single element
 		if idx == 0 {

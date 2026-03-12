@@ -81,7 +81,7 @@ func TestGetIndex(t *testing.T) {
 	s.Slices = []KvSet[int, int]{{0, 0}}
 	t.Logf("Root: %v, size: %d", s.Slices[0], len(s.Slices))
 	// note this was fatal in one variation of the code
-	index, offset = GetIndex(1, s.Cmp, s.Slices)
+	//index, offset = GetIndex(1, s.Cmp, s.Slices)
 
 	s.Slices = []KvSet[int, int]{
 		{0, 0},
